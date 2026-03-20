@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Base config for all domains -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+        <!-- Allow expired certificates in debug builds -->
+        <debug-overrides>
+            <trust-anchors>
+                <certificates src="system" />
+                <certificates src="user" />
+            </trust-anchors>
+        </debug-overrides>
+    </base-config>
+
+    <!-- Specific domain configurations -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">192.168.1.10</domain>
+        <domain includeSubdomains="true">192.168.1.11</domain>
+        <domain includeSubdomains="true">192.168.1.8</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- For emulator -->
+        <!-- Allow expired certificates for local domains in debug -->
+        <debug-overrides>
+            <trust-anchors>
+                <certificates src="system" />
+                <certificates src="user" />
+            </trust-anchors>
+        </debug-overrides>
+    </domain-config>
+
+    <!-- Streaming and CDN domains - with debug overrides for expired certs -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">demo.unified-streaming.com</domain>
+        <domain includeSubdomains="true">storage.googleapis.com</domain>
+        <domain includeSubdomains="true">youtube.com</domain>
+        <domain includeSubdomains="true">ytimg.com</domain>
+        <domain includeSubdomains="true">googlevideo.com</domain>
+        <domain includeSubdomains="true">ggpht.com</domain>
+        <domain includeSubdomains="true">test-streams.mux.dev</domain>
+        <domain includeSubdomains="true">bitdash-a.akamaihd.net</domain>
+        <domain includeSubdomains="true">cph-p2p-msl.akamaized.net</domain>
+
+        <!-- Trust anchors -->
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+
+        <!-- Allow expired certificates in debug builds -->
+        <debug-overrides>
+            <trust-anchors>
+                <certificates src="system" />
+                <certificates src="user" />
+            </trust-anchors>
+        </debug-overrides>
+    </domain-config>
+
+    <!-- TMDB domains - HTTPS only -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.themoviedb.org</domain>
+        <domain includeSubdomains="true">image.tmdb.org</domain>
+        <domain includeSubdomains="true">themoviedb.org</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <!-- Allow expired certificates in debug builds -->
+        <debug-overrides>
+            <trust-anchors>
+                <certificates src="system" />
+                <certificates src="user" />
+            </trust-anchors>
+        </debug-overrides>
+    </domain-config>
+
+    <!-- Unsplash domains for background images -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">images.unsplash.com</domain>
+        <domain includeSubdomains="true">unsplash.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+        <!-- Allow expired certificates in debug builds -->
+        <debug-overrides>
+            <trust-anchors>
+                <certificates src="system" />
+                <certificates src="user" />
+            </trust-anchors>
+        </debug-overrides>
+    </domain-config>
+</network-security-config>

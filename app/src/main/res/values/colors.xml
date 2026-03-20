@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- TV Optimized Colors -->
+    <color name="tv_background_dark">#FF0A0A0A</color>
+    <color name="tv_text_primary">#FFFFFFFF</color>
+    <color name="tv_text_secondary">#E0FFFFFF</color>
+    <color name="tv_text_hint">#B3FFFFFF</color>
+    <color name="tv_accent">#FFFFD700</color>
+    <color name="tv_accent_dark">#FFB8860B</color>
+
+    <!-- Brand Colors -->
+    <color name="purple_500">#6A0DAD</color>
+    <color name="purple_700">#4A0D6A</color>
+
+
+    <color name="red">#E50914</color>
+    <color name="dark_gray">#333333</color>
+    <color name="light_gray">#B3B3B3</color>
+    <color name="gray">#808080</color>
+
+    <color name="primary">#6200EE</color>
+    <!-- Transparent variants -->
+    <color name="transparent">#00000000</color>
+    <color name="semi_transparent">#B3000000</color>
+    <color name="semi_transparent_dark">#99000000</color>
+    <color name="semi_transparent_light">#33FFFFFF</color>
+    <color name="semi_transparent_red">#33E50914</color>
+    <color name="off_white">#F5F5F5</color>
+    <color name="primary_dark">#E50914</color>
+
+    <color name="jetstream_background">#1A1C1E</color>
+    <color name="onPrimary">#003062</color>
+    <color name="primaryContainer">#00468A</color>
+    <color name="onPrimaryContainer">#D6E3FF</color>
+    <color name="secondary">#BDC7DC</color>
+    <color name="onSecondary">#273141</color>
+    <color name="secondaryContainer">#3E4758</color>
+    <color name="onSecondaryContainer">#D9E3F8</color>
+    <color name="tertiary">#DCBCE1</color>
+    <color name="onTertiary">#3E2845</color>
+    <color name="tertiaryContainer">#563E5C</color>
+    <color name="onTertiaryContainer">#F9D8FE</color>
+    <color name="background">#1A1C1E</color>
+    <color name="onBackground">#E3E2E6</color>
+    <color name="surface">#1A1C1E</color>
+    <color name="onSurface">#E3E2E6</color>
+    <color name="surfaceVariant">#43474E</color>
+    <color name="onSurfaceVariant">#C4C6CF</color>
+    <color name="error">#FFB4AB</color>
+    <color name="onError">#690005</color>
+    <color name="errorContainer">#93000A</color>
+    <color name="onErrorContainer">#FFB4AB</color>
+    <color name="border">#8E9099</color>
+    <color name="ic_launcher_background">#1A1C1E</color>
+<!--    //////////////-->
+
+    <color name="default_background">#99000000</color>
+    <color name="default_background_tr">#9937474F</color>
+    <color name="default_background_dark">#99000000</color>
+    <color name="tr">#00000000</color>
+    <color name="tr_dark">#50000000</color>
+    <color name="tr_darken">#99000000</color>
+<!--    <color name="black">#000000</color>-->
+    <color name="default_accent">#01D277</color>
+    <color name="default_accent_sup">#f7941d</color>
+
+    <color name="card_primary_text">#EEEEEE</color>
+    <color name="card_secondary_text">#99EEEEEE</color>
+
+    <color name="rate_middle">#d2d531</color>
+<!--    <color name="purple_200">#F44336</color>-->
+<!--    <color name="purple_700">#40100C</color>-->
+<!--    <color name="teal_200">#D55E55</color>-->
+<!--    <color name="purple_500">#D55E55</color>-->
+<!--    <color name="teal_700">#D55E55</color>-->
+
+    <color name="seekbar_bg">#90222e33</color>
+    <color name="seekbar_primary">#526e7b</color>
+    <color name="seekbar_secondary">#8037474F</color>
+<!--    <color name="transparent">#00000000</color>-->
+
+    <color name="icon_color">#01D277</color>
+    <color name="white_tr">#60FFFFFF</color>
+
+
+    <color name="background_gradient_start">#FFFFFF</color>
+    <color name="background_gradient_end">#DDDDDD</color>
+
+    <color name="search_opaque">#01D277</color>
+    <color name="search_bright_color">#01D277</color>
+    <color name="search_color">#EEEEEE</color>
+    <color name="yellow">#FFC107</color>
+    <color name="kids_background">#667eea</color>
+    <color name="kids_background_end">#764ba2</color>
+
+    <color name="accent">#FF4081</color>
+
+
+    <color name="card_background">#FF1A1A1A</color>
+    <!-- Or if you want the exact same color with alpha -->
+    <color name="card_background_opaque">#FF1A1A1A</color>
+</resources>

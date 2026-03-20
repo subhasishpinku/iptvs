@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "906406600512",
+    "project_id": "iptv-bhoreralo",
+    "storage_bucket": "iptv-bhoreralo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906406600512:android:cf8c834f37297ece3264a5",
+        "android_client_info": {
+          "package_name": "com.bacbpl.iptv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "906406600512-mtfig19ilvski2uoq564ac92j13b6cvc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-ppC-01qqiKhVO66MT6UM_b74a83zMe4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "906406600512-mtfig19ilvski2uoq564ac92j13b6cvc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

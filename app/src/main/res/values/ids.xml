@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="news_title" type="id"/>
+    <item name="news_source" type="id"/>
+    <item name="sports_category" type="id"/>
+    <item name="sports_title" type="id"/>
+    <item name="sports_match_info" type="id"/>
+    <item name="sports_live" type="id"/>
+    <item name="ott_title" type="id"/>
+    <item name="channel_title" type="id"/>
+    <item name="devotional_badge" type="id"/>
+
+    <item name="age_badge" type="id"/>
+
+    <item name="rating_badge" type="id"/>
+
+    <item name="type_badge" type="id"/>
+    <item name="ottplay_badge" type="id"/>
+
+    <item name="provider_badge" type="id" />
+</resources>
