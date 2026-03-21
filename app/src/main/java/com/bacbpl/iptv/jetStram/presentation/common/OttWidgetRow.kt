@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -98,10 +99,14 @@ fun OttWidgetItemCard(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isFocused) 1.05f else 1f)
+    LaunchedEffect(item.id) {
+        android.util.Log.d("OttWidgetItemCard", "Item: ${item.title}, Poster URL: ${item.posterUrl}")
+        android.util.Log.d("OttWidgetItemCard", "Full item details: $item")
+    }
 
     Card(
         modifier = modifier
-            .width(220.dp)
+            .width(180.dp)
             .aspectRatio(0.7f)
             .scale(scale)
             .onFocusChanged { isFocused = it.isFocused }

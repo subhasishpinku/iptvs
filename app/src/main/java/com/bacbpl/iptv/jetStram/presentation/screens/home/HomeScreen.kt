@@ -124,16 +124,16 @@ private fun Catalog(
             )
         }
         // Live TV Channels Row
-        if (tvChannels.isNotEmpty()) {
-            item(contentType = "TvChannelsRow") {
-                TvChannelsRow(
-                    title = "Live TV Channels",
-                    channels = tvChannels.take(10),
-                    onChannelSelected = onTvChannelClick,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-            }
-        }
+//        if (tvChannels.isNotEmpty()) {
+//            item(contentType = "TvChannelsRow") {
+//                TvChannelsRow(
+//                    title = "Live TV Channels",
+//                    channels = tvChannels.take(10),
+//                    onChannelSelected = onTvChannelClick,
+//                    modifier = Modifier.padding(top = 16.dp)
+//                )
+//            }
+//        }
 
         // OTT Widgets - Dynamic rows from API
         widgets.forEach { widget ->
@@ -141,7 +141,7 @@ private fun Catalog(
                 OttWidgetRow(
                     widget = widget,
                     onItemClick = onWidgetItemClick,
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 )
             }
         }
@@ -151,7 +151,7 @@ private fun Catalog(
         // Trending Movies
         item(contentType = "MoviesRow") {
             MoviesRow(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 10.dp),
                 movieList = trendingMovies,
                 title = StringConstants.Composable.HomeScreenTrendingTitle,
                 onMovieSelected = onMovieClick
@@ -169,7 +169,7 @@ private fun Catalog(
             )
         }
         // Add More TV Channels by Category
-        if (tvChannels.size > 10) {
+  //      if (tvChannels.size > 10) {
 //            item(contentType = "TvChannelsRowBangla") {
 //                val banglaChannels = tvChannels.filter { it.category == "Bangla" }
 //                if (banglaChannels.isNotEmpty()) {
@@ -205,11 +205,11 @@ private fun Catalog(
 //                    )
 //                }
 //            }
-        }
+    //    }
         // Now Playing Movies
         item(contentType = "MoviesRow") {
             MoviesRow(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 10.dp),
                 movieList = nowPlayingMovies,
                 title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
                 onMovieSelected = onMovieClick

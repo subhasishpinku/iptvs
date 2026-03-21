@@ -37,7 +37,13 @@ import com.bacbpl.iptv.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.data.entities.MovieDetails
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamButtonShape
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.*
+import org.json.JSONObject
+import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -51,6 +57,7 @@ fun MovieDetails(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var imageLoadingError by remember { mutableStateOf(false) }
+    var isLoadingAuthUrl by remember { mutableStateOf(false) }
 
     // Move gradientColor inside @Composable function
     val gradientColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
@@ -193,11 +200,35 @@ fun MovieDetails(
                             icon = Icons.Outlined.OpenInBrowser,
                             text = stringResource(R.string.now_playing),
                             onClick = {
-                                println("ottplayUrl+$ottplayUrl");
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
-                                context.startActivity(intent)
+                                coroutineScope.launch {
+                                    isLoadingAuthUrl = true
+                                    try {
+                                        val authorizedUrl = withContext(Dispatchers.IO) {
+                                            getAuthorizedOttplayUrl(ottplayUrl)
+                                        }
+                                        if (authorizedUrl != null) {
+                                            println("Opening authorized URL: $authorizedUrl")
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authorizedUrl))
+                                            context.startActivity(intent)
+                                        } else {
+                                            // Fallback to original URL if authorization fails
+                                            println("Failed to get authorized URL, using original: $ottplayUrl")
+                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
+                                            context.startActivity(intent)
+                                        }
+                                    } catch (e: Exception) {
+                                        println("Error getting authorized URL: ${e.message}")
+                                        e.printStackTrace()
+                                        // Fallback to original URL
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
+                                        context.startActivity(intent)
+                                    } finally {
+                                        isLoadingAuthUrl = false
+                                    }
+                                }
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            isLoading = isLoadingAuthUrl
                         )
                     }
                 }
@@ -206,28 +237,112 @@ fun MovieDetails(
     }
 }
 
+// Function to get authorized OTTplay URL with Bearer Token using POST
+private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String): String? {
+    return try {
+        val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
+
+        println("Original ottplayUrl: $ottplayUrl")
+
+        // Create OkHttpClient with timeout configurations
+        val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        // Create form body with ottplay_url parameter
+        val formBody = FormBody.Builder()
+            .add("ottplay_url", ottplayUrl)
+            .build()
+
+        // Build POST request with Bearer token
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer 123123")
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .addHeader("Accept", "application/json")
+            .post(formBody)
+            .build()
+
+        println("Making POST request to: $url")
+        println("Request body: ottplay_url=$ottplayUrl")
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+
+        println("Response code: ${response.code}")
+        println("Response body: $responseBody")
+
+        if (response.isSuccessful && responseBody != null) {
+            // Parse the JSON response
+            val jsonObject = JSONObject(responseBody)
+            val success = jsonObject.optBoolean("success", false)
+            val authorizedUrl = jsonObject.optString("url", null)
+            val message = jsonObject.optString("message", "")
+
+            if (success && !authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+                println("Successfully got authorized URL: $authorizedUrl")
+                authorizedUrl
+            } else {
+                println("Authorization failed - Success: $success, Message: $message")
+                // Try to see if there's any URL in the response anyway
+                if (!authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+                    println("Found URL even though success was false: $authorizedUrl")
+                    authorizedUrl
+                } else {
+                    null
+                }
+            }
+        } else {
+            println("HTTP request failed with code: ${response.code}")
+            println("Error response: $responseBody")
+            null
+        }
+    } catch (e: Exception) {
+        println("Exception in getAuthorizedOttplayUrl: ${e.message}")
+        e.printStackTrace()
+        null
+    }
+}
+
 @Composable
 private fun ActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
         contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-        shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+        shape = ButtonDefaults.shape(shape = JetStreamButtonShape),
+        enabled = !isLoading
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null
-        )
-        Spacer(Modifier.size(8.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleSmall
-        )
+        if (isLoading) {
+            // Loading indicator
+            androidx.compose.material3.CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleSmall
+            )
+        } else {
+            Icon(
+                imageVector = icon,
+                contentDescription = null
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleSmall
+            )
+        }
     }
 }
 
