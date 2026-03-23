@@ -1334,6 +1334,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -1355,6 +1356,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -1733,7 +1735,7 @@ fun TvPlayerScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(0.dp)
+                .padding(5.dp)
         )
 
         // Channel Grid (Shows when category is selected and down pressed)
@@ -1842,16 +1844,19 @@ fun TopActionBar(
 
     Surface(
         modifier = modifier
-            .shadow(elevation = 0.dp, shape = RoundedCornerShape(0.dp)),
+            .wrapContentWidth() // This will make the width fit the content
+            .padding(horizontal = 4.dp) // 👈 add this
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(20.dp)),
         color = Color.Black.copy(alpha = 0.8f),
-        shape = RoundedCornerShape(0.dp)
+        shape = RoundedCornerShape(20.dp) // 👈 MUST match
     ) {
         LazyRow(
             state = listState,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp), // 👈 important
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 12.dp)
+                .wrapContentWidth() // LazyRow will also wrap to content
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             items(categories.size) { index ->
                 val (category, icon) = categories[index]
@@ -1916,22 +1921,24 @@ fun ActionBarItem(
             }
             .then(
                 if (isSelected || isFocused) {
-                    Modifier.border(2.dp, Color.Red, RoundedCornerShape(20.dp))
+                    Modifier.border(2.dp, Color.White, RoundedCornerShape(20.dp))
                 } else {
                     Modifier
                 }
             ),
-        color = if (isSelected) Color.Red.copy(alpha = 0.3f) else Color.Transparent,
+        color = if (isSelected) Color.White.copy(alpha = 0.3f) else Color.Transparent,
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            Modifier
+                .border(1.dp, Color.White, RoundedCornerShape(20.dp))
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                tint = if (isSelected || isFocused) Color.Red else Color.White,
+                tint = if (isSelected || isFocused) Color.White else Color.White,
                 modifier = Modifier.size(20.dp)
             )
 
@@ -1939,7 +1946,7 @@ fun ActionBarItem(
 
             Text(
                 text = title,
-                color = if (isSelected || isFocused) Color.Red else Color.White,
+                color = if (isSelected || isFocused) Color.White else Color.White,
                 fontSize = 14.sp,
                 fontWeight = if (isSelected || isFocused) FontWeight.Bold else FontWeight.Normal
             )
@@ -2361,133 +2368,139 @@ fun ChannelInfoOverlay(
         }
     }
 }
-
 @Composable
 fun SwipeChannelOverlay(
     nextChannel: TvChannel?,
     previousChannel: TvChannel?,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 0.dp, vertical = 0.dp),
-        color = Color(0xFF1A1A1A).copy(alpha = 0.85f),
-        shape = RoundedCornerShape(0.dp)
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Row(
+        Surface(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+                .wrapContentSize()
+                .padding(horizontal = 12.dp, vertical = 8.dp) // 👈 আরও ছোট প্যাডিং
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp)), // 👈 শেপও ছোট
+            color = Color.Black.copy(alpha = 0.85f),
+            shape = RoundedCornerShape(32.dp)
         ) {
-            // Previous Channel Section
-            if (previousChannel != null) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowLeft,
-                        contentDescription = "Previous",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Previous Channel Image
-                    Surface(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        color = Color.DarkGray
+            Row(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+//                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                // Previous Channel Section
+                if (previousChannel != null) {
+                    Row(
+//                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(previousChannel.logoUrl)
-                                .crossfade(true)
-                                .error(R.drawable.logos)
-                                .build(),
-                            contentDescription = previousChannel.name,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowLeft,
+                            contentDescription = "Previous",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Previous Channel Image - Fixed
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.DarkGray)
+                        ) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(previousChannel.logoUrl)
+                                    .crossfade(true)
+                                    .error(R.drawable.logos)
+                                    .build(),
+                                contentDescription = previousChannel.name,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = previousChannel.name.take(12) + if (previousChannel.name.length > 12) "..." else "",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
                         )
                     }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = previousChannel.name.take(15) + if (previousChannel.name.length > 15) "..." else "",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
-                    )
                 }
-            } else {
-                Box(modifier = Modifier.width(120.dp))
-            }
+                else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
 
-            Spacer(modifier = Modifier.width(20.dp))
+                // Center Text
+                Text(
+                    text = "←  SWIPE TO CHANGE  →",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
 
-            // Center Text
-            Text(
-                text = "Swipe to change",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            // Next Channel Section
-            if (nextChannel != null) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = nextChannel.name.take(15) + if (nextChannel.name.length > 15) "..." else "",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Next Channel Image
-                    Surface(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        color = Color.DarkGray
+                // Next Channel Section
+                if (nextChannel != null) {
+                    Row(
+//                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(nextChannel.logoUrl)
-                                .crossfade(true)
-                                .error(R.drawable.logos)
-                                .build(),
-                            contentDescription = nextChannel.name,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
+                        Text(
+                            text = nextChannel.name.take(12) + if (nextChannel.name.length > 12) "..." else "",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Next Channel Image - Fixed
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.DarkGray)
+                        ) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(nextChannel.logoUrl)
+                                    .crossfade(true)
+                                    .error(R.drawable.logos)
+                                    .build(),
+                                contentDescription = nextChannel.name,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "Next",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowRight,
-                        contentDescription = "Next",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-            } else {
-                Box(modifier = Modifier.width(120.dp))
             }
         }
     }
