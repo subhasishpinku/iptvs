@@ -85,14 +85,14 @@ fun DashboardTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 5.dp) // Reduced from 16.dp to 8.dp
                 .background(MaterialTheme.colorScheme.surface)
                 .focusRestorer(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             UserAvatar(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(28.dp) // Reduced from 32.dp to 28.dp
                     .focusRequester(focusRequesters[0])
                     .semantics {
                         contentDescription =
@@ -108,7 +108,7 @@ fun DashboardTopBar(
             ) {
                 var isTabRowFocused by remember { mutableStateOf(false) }
 
-                Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(16.dp)) // Reduced from 20.dp to 16.dp
                 TabRow(
                     modifier = Modifier
                         .onFocusChanged {
@@ -130,7 +130,7 @@ fun DashboardTopBar(
                         key(index) {
                             Tab(
                                 modifier = Modifier
-                                    .height(32.dp)
+                                    .height(28.dp) // Reduced from 32.dp to 28.dp
                                     .focusRequester(focusRequesters[index + 1]),
                                 selected = index == selectedTabIndex,
                                 onFocus = { onScreenSelection(screen) },
@@ -148,7 +148,7 @@ fun DashboardTopBar(
                                     Text(
                                         modifier = Modifier
                                             .occupyScreenSize()
-                                            .padding(horizontal = 16.dp),
+                                            .padding(horizontal = 12.dp), // Reduced from 16.dp to 12.dp
                                         text = screen(),
                                         style = MaterialTheme.typography.titleSmall.copy(
                                             color = LocalContentColor.current
@@ -164,7 +164,7 @@ fun DashboardTopBar(
             JetStreamLogo(
                 modifier = Modifier
                     .alpha(0.75f)
-                    .padding(end = 8.dp),
+                    .padding(end = 4.dp), // Reduced from 8.dp to 4.dp
             )
         }
     }
@@ -178,32 +178,12 @@ private fun JetStreamLogo(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // First icon
-//        Icon(
-//            Icons.Default.PlayCircle,
-//            contentDescription = StringConstants.Composable
-//                .ContentDescription.BrandLogoImage,
-//            modifier = Modifier
-//                .padding(end = 4.dp)
-//                .size(IconSize)
-//        )
-
-        // Text in the middle
-//        Text(
-//            text = stringResource(R.string.brand_logo_text),
-//            style = MaterialTheme.typography.titleSmall,
-//            fontWeight = FontWeight.Medium,
-//            fontFamily = LexendExa
-//        )
-
-        // Image at the end
         Image(
             painter = painterResource(id = R.drawable.logos),
             contentDescription = "JetStream Logo Image",
             modifier = Modifier
                 .padding(start = 4.dp)
-                .size(100.dp)
+                .size(80.dp) // Reduced from 100.dp to 80.dp
         )
     }
-
 }

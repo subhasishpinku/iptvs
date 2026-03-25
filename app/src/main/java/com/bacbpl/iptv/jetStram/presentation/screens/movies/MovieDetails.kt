@@ -1,5 +1,6 @@
 package com.bacbpl.iptv.jetStram.presentation.screens.movies
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,6 +34,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bacbpl.iptv.R
+import com.bacbpl.iptv.data.SharedPrefManager
 import com.bacbpl.iptv.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.data.entities.MovieDetails
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
@@ -204,7 +206,7 @@ fun MovieDetails(
                                     isLoadingAuthUrl = true
                                     try {
                                         val authorizedUrl = withContext(Dispatchers.IO) {
-                                            getAuthorizedOttplayUrl(ottplayUrl)
+                                            getAuthorizedOttplayUrl(ottplayUrl, context)
                                         }
                                         if (authorizedUrl != null) {
                                             println("Opening authorized URL: $authorizedUrl")
@@ -238,11 +240,92 @@ fun MovieDetails(
 }
 
 // Function to get authorized OTTplay URL with Bearer Token using POST
-private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String): String? {
+//private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context): String? {
+//    return try {
+//        val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
+//        val sharedPrefManager = SharedPrefManager(context)
+//        val token = sharedPrefManager.getToken()
+//        println("Original ottplayUrl: $ottplayUrl")
+//
+//        // Create OkHttpClient with timeout configurations
+//        val client = OkHttpClient.Builder()
+//            .connectTimeout(30, TimeUnit.SECONDS)
+//            .readTimeout(30, TimeUnit.SECONDS)
+//            .writeTimeout(30, TimeUnit.SECONDS)
+//            .build()
+//
+//        // Create form body with ottplay_url parameter
+//        val formBody = FormBody.Builder()
+//            .add("ottplay_url", ottplayUrl)
+//            .build()
+//
+//        // Build POST request with Bearer token
+//        val request = Request.Builder()
+//            .url(url)
+//            .addHeader("Authorization", "Bearer 132|ClUBpdoHQ4VpWhwhOdcz1Jc2rbbIb2bcG1YMzFGs9c6c4fa5")
+//            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+//            .addHeader("Accept", "application/json")
+//            .post(formBody)
+//            .build()
+//
+//        println("Making POST request to: $url")
+//        println("Request body: ottplay_url=$ottplayUrl")
+//
+//        val response = client.newCall(request).execute()
+//        val responseBody = response.body?.string()
+//
+//        println("Response code: ${response.code}")
+//        println("Response body: $responseBody")
+//
+//        if (response.isSuccessful && responseBody != null) {
+//            // Parse the JSON response
+//            val jsonObject = JSONObject(responseBody)
+//            val success = jsonObject.optBoolean("success", false)
+//            val authorizedUrl = jsonObject.optString("url", null)
+//            val message = jsonObject.optString("message", "")
+//
+//            if (success && !authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+//                println("Successfully got authorized URL: $authorizedUrl")
+//                authorizedUrl
+//            } else {
+//                println("Authorization failed - Success: $success, Message: $message")
+//                // Try to see if there's any URL in the response anyway
+//                if (!authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+//                    println("Found URL even though success was false: $authorizedUrl")
+//                    authorizedUrl
+//                } else {
+//                    null
+//                }
+//            }
+//        } else {
+//            println("HTTP request failed with code: ${response.code}")
+//            println("Error response: $responseBody")
+//            null
+//        }
+//    } catch (e: Exception) {
+//        println("Exception in getAuthorizedOttplayUrl: ${e.message}")
+//        e.printStackTrace()
+//        null
+//    }
+//}
+
+private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context): String? {
     return try {
         val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
 
+        // Get token from SharedPrefManager - NOW context is available
+        val sharedPrefManager = SharedPrefManager(context)
+        val token = sharedPrefManager.getToken()
+
+        println("=== Getting Authorized URL ===")
         println("Original ottplayUrl: $ottplayUrl")
+        println("Token from SharedPref: ${if (token != null) "Found (${token.take(20)}...)" else "NOT FOUND"}")
+
+        // Check if token exists
+        if (token.isNullOrEmpty()) {
+            println("ERROR: No authentication token found. User may not be logged in.")
+            return null
+        }
 
         // Create OkHttpClient with timeout configurations
         val client = OkHttpClient.Builder()
@@ -256,10 +339,10 @@ private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String): String? {
             .add("ottplay_url", ottplayUrl)
             .build()
 
-        // Build POST request with Bearer token
+        // Build POST request with Bearer token from SharedPreferences
         val request = Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Bearer 123123")
+            .addHeader("Authorization", "Bearer $token")  // USING DYNAMIC TOKEN
             .addHeader("Content-Type", "application/x-www-form-urlencoded")
             .addHeader("Accept", "application/json")
             .post(formBody)
@@ -297,6 +380,18 @@ private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String): String? {
         } else {
             println("HTTP request failed with code: ${response.code}")
             println("Error response: $responseBody")
+
+            // Handle specific error codes
+            when (response.code) {
+                401 -> {
+                    println("UNAUTHORIZED - Token may be expired. Clearing session.")
+                    // Clear the session on unauthorized
+                    sharedPrefManager.clearUserSession()
+                }
+                403 -> println("FORBIDDEN - Token doesn't have permission")
+                404 -> println("API endpoint not found")
+                else -> println("Unknown error: ${response.code}")
+            }
             null
         }
     } catch (e: Exception) {

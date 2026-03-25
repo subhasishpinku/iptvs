@@ -44,11 +44,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bacbpl.iptv.ui.activities.StartScreen
 import com.bacbpl.iptv.utils.UserSession
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
+import com.bacbpl.iptv.jetStram.presentation.viewmodel.ProfileViewModel
+import com.bacbpl.iptv.ui.activities.signupscreen.data.repository.Resource
 
-// Add missing icon constants
+// Icon constants
 val QrCode = Icons.Default.QrCodeScanner
 val ConfirmationNumber = Icons.Default.ConfirmationNumber
 val LocationOn = Icons.Default.LocationOn
@@ -67,7 +70,7 @@ data class AccountsSectionData(
 
 // Data class for subscriber information
 data class SubscriberInfo(
-    val useAltLcoCode: String = "0", // "1" if partner operator code should be used
+    val useAltLcoCode: String = "0",
     val phone: String = "",
     val email: String = "",
     val firstName: String = "",
@@ -79,8 +82,11 @@ data class SubscriberInfo(
     val stateCode: String = ""
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountsSection() {
+fun AccountsSection(
+    profileViewModel: ProfileViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val isLoggedIn by UserSession.isLoggedIn.collectAsState()
     val userName by UserSession.userName.collectAsState()
@@ -91,6 +97,33 @@ fun AccountsSection() {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showSubscriberInfo by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+
+    // Collect update profile state
+    val updateProfileState by profileViewModel.updateProfileState.collectAsState()
+    val isUpdating by profileViewModel.isUpdating.collectAsState()
+
+    // Show snackbar for update result
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(updateProfileState) {
+        when (updateProfileState) {
+            is Resource.Success -> {
+                snackbarHostState.showSnackbar(
+                    (updateProfileState as Resource.Success).data.message,
+                    duration = SnackbarDuration.Short
+                )
+                profileViewModel.resetUpdateState()
+                showSubscriberInfo = false
+            }
+            is Resource.Error -> {
+                snackbarHostState.showSnackbar(
+                    (updateProfileState as Resource.Error).message,
+                    duration = SnackbarDuration.Short
+                )
+                profileViewModel.resetUpdateState()
+            }
+            else -> {}
+        }
+    }
 
     // Subscriber info state
     var subscriberInfo by remember {
@@ -109,184 +142,197 @@ fun AccountsSection() {
         UserSession.updateSession(context)
     }
 
-    if (!isLoggedIn) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(childPadding.start),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Please login to view profile",
-                color = Color.White,
-                fontSize = 18.sp
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Quick Stats Row
-            Row(
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = Color.Black  // Set scaffold background to black
+    ) { paddingValues ->
+        if (!isLoggedIn) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = childPadding.start, vertical = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color.Black),  // Black background
+                contentAlignment = Alignment.Center
             ) {
-                QuickStatCard(
-                    title = "Partner Ref ID",
-                    value = subscriberInfo.partnerReferenceId.ifEmpty { "Not Set" },
-                    icon = QrCode,
-                    modifier = Modifier.weight(1f)
-                )
-                QuickStatCard(
-                    title = "Zone",
-                    value = subscriberInfo.zone.ifEmpty { "Not Set" },
-                    icon = LocationOn,
-                    modifier = Modifier.weight(1f)
-                )
-                QuickStatCard(
-                    title = "Service No",
-                    value = subscriberInfo.serviceNumber.ifEmpty { "Not Set" },
-                    icon = ConfirmationNumber,
-                    modifier = Modifier.weight(1f)
+                Text(
+                    text = "Please login to view profile",
+                    color = Color.White,  // White text on black background
+                    fontSize = 18.sp
                 )
             }
-
-            // Main Account Section
-            val accountsSectionListItems = remember(userName, userEmail, userMobile, subscriberInfo) {
-                listOf(
-                    // Basic Info
-                    AccountsSectionData(
-                        title = "Name",
-                        value = userName ?: "User",
-                        icon = Icons.Default.Person
-                    ),
-                    AccountsSectionData(
-                        title = "Email",
-                        value = userEmail ?: "Email not set",
-                        icon = Icons.Default.Email
-                    ),
-                    AccountsSectionData(
-                        title = "Mobile",
-                        value = userMobile ?: "Mobile not set",
-                        icon = Icons.Default.Phone
-                    ),
-
-                    // Partner/Subscriber Info
-                    AccountsSectionData(
-                        title = "Use Alt LCO Code",
-                        value = if (subscriberInfo.useAltLcoCode == "1") "Yes" else "No",
-                        icon = Icons.Default.Settings
-                    ),
-                    AccountsSectionData(
-                        title = "First Name",
-                        value = subscriberInfo.firstName.ifEmpty { "Not set" },
-                        icon = PersonOutline
-                    ),
-                    AccountsSectionData(
-                        title = "Last Name",
-                        value = subscriberInfo.lastName.ifEmpty { "Not set" },
-                        icon = PersonOutline
-                    ),
-                    AccountsSectionData(
-                        title = "Address",
-                        value = subscriberInfo.address.ifEmpty { "Not set" },
-                        icon = Icons.Default.Home
-                    ),
-                    AccountsSectionData(
-                        title = "Partner Reference ID",
-                        value = subscriberInfo.partnerReferenceId.ifEmpty { "Not set" },
-                        icon = QrCode
-                    ),
-                    AccountsSectionData(
-                        title = "Zone",
-                        value = subscriberInfo.zone.ifEmpty { "Not set" },
-                        icon = LocationOn
-                    ),
-                    AccountsSectionData(
-                        title = "Service Number",
-                        value = subscriberInfo.serviceNumber.ifEmpty { "Not set" },
-                        icon = ConfirmationNumber
-                    ),
-                    AccountsSectionData(
-                        title = "State Code",
-                        value = subscriberInfo.stateCode.ifEmpty { "Not set" },
-                        icon = Map
-                    ),
-
-                    // Actions
-                    AccountsSectionData(
-                        title = "Edit Subscriber Info",
-                        icon = Icons.Default.Edit,
-                        onClick = { showSubscriberInfo = true }
-                    ),
-                    AccountsSectionData(
-                        title = "Change Password",
-                        value = "Change",
-                        icon = Icons.Default.Lock,
-                        onClick = { /* Navigate to change password */ }
-                    ),
-                    AccountsSectionData(
-                        title = "View Subscriptions",
-                        icon = Subscriptions,
-                        onClick = { /* Navigate to subscriptions */ }
-                    ),
-                    AccountsSectionData(
-                        title = "Log Out",
-                        icon = Logout,
-                        onClick = {
-                            UserSession.clearSession(context)
-                            val intent = Intent(context, StartScreen::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            context.startActivity(intent)
-                        }
-                    ),
-                    AccountsSectionData(
-                        title = "Delete Account",
-                        icon = Icons.Default.Delete,
-                        onClick = { showDeleteDialog = true }
-                    )
-                )
-            }
-
-            LazyVerticalGrid(
+        } else {
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = childPadding.start),
-                columns = GridCells.Fixed(3),
-                content = {
-                    items(accountsSectionListItems.size) { index ->
-                        AccountsSelectionItem(
-                            modifier = Modifier
-                                .focusRequester(if (index == 0) focusRequester else FocusRequester())
-                                .padding(4.dp),
-                            key = index,
-                            accountsSectionData = accountsSectionListItems[index]
+                    .fillMaxSize()
+                    .background(Color.Black)  // Black background for main column
+                    .padding(paddingValues)
+            ) {
+                // Quick Stats Row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = childPadding.start, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    QuickStatCard(
+                        title = "Partner Ref ID",
+                        value = subscriberInfo.partnerReferenceId.ifEmpty { "Not Set" },
+                        icon = QrCode,
+                        modifier = Modifier.weight(1f)
+                    )
+                    QuickStatCard(
+                        title = "Zone",
+                        value = subscriberInfo.zone.ifEmpty { "Not Set" },
+                        icon = LocationOn,
+                        modifier = Modifier.weight(1f)
+                    )
+                    QuickStatCard(
+                        title = "Service No",
+                        value = subscriberInfo.serviceNumber.ifEmpty { "Not Set" },
+                        icon = ConfirmationNumber,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Main Account Section
+                val accountsSectionListItems = remember(userName, userEmail, userMobile, subscriberInfo) {
+                    listOf(
+                        // Basic Info
+                        AccountsSectionData(
+                            title = "Name",
+                            value = userName ?: "User",
+                            icon = Icons.Default.Person
+                        ),
+                        AccountsSectionData(
+                            title = "Email",
+                            value = userEmail ?: "Email not set",
+                            icon = Icons.Default.Email
+                        ),
+                        AccountsSectionData(
+                            title = "Mobile",
+                            value = userMobile ?: "Mobile not set",
+                            icon = Icons.Default.Phone
+                        ),
+
+                        // Partner/Subscriber Info
+                        AccountsSectionData(
+                            title = "Use Alt LCO Code",
+                            value = if (subscriberInfo.useAltLcoCode == "1") "Yes" else "No",
+                            icon = Icons.Default.Settings
+                        ),
+                        AccountsSectionData(
+                            title = "First Name",
+                            value = subscriberInfo.firstName.ifEmpty { "Not set" },
+                            icon = PersonOutline
+                        ),
+                        AccountsSectionData(
+                            title = "Last Name",
+                            value = subscriberInfo.lastName.ifEmpty { "Not set" },
+                            icon = PersonOutline
+                        ),
+                        AccountsSectionData(
+                            title = "Address",
+                            value = subscriberInfo.address.ifEmpty { "Not set" },
+                            icon = Icons.Default.Home
+                        ),
+                        AccountsSectionData(
+                            title = "Partner Reference ID",
+                            value = subscriberInfo.partnerReferenceId.ifEmpty { "Not set" },
+                            icon = QrCode
+                        ),
+                        AccountsSectionData(
+                            title = "Zone",
+                            value = subscriberInfo.zone.ifEmpty { "Not set" },
+                            icon = LocationOn
+                        ),
+                        AccountsSectionData(
+                            title = "Service Number",
+                            value = subscriberInfo.serviceNumber.ifEmpty { "Not set" },
+                            icon = ConfirmationNumber
+                        ),
+                        AccountsSectionData(
+                            title = "State Code",
+                            value = subscriberInfo.stateCode.ifEmpty { "Not set" },
+                            icon = Map
+                        ),
+
+                        // Actions
+                        AccountsSectionData(
+                            title = "Edit Subscriber Info",
+                            icon = Icons.Default.Edit,
+                            onClick = { showSubscriberInfo = true }
+                        ),
+                        AccountsSectionData(
+                            title = "Change Password",
+                            value = "Change",
+                            icon = Icons.Default.Lock,
+                            onClick = { /* Navigate to change password */ }
+                        ),
+                        AccountsSectionData(
+                            title = "View Subscriptions",
+                            icon = Subscriptions,
+                            onClick = { /* Navigate to subscriptions */ }
+                        ),
+                        AccountsSectionData(
+                            title = "Log Out",
+                            icon = Logout,
+                            onClick = {
+                                UserSession.clearSession(context)
+                                val intent = Intent(context, StartScreen::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                context.startActivity(intent)
+                            }
+                        ),
+                        AccountsSectionData(
+                            title = "Delete Account",
+                            icon = Icons.Default.Delete,
+                            onClick = { showDeleteDialog = true }
                         )
+                    )
+                }
+
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = childPadding.start),
+                    columns = GridCells.Fixed(3),
+                    content = {
+                        items(accountsSectionListItems.size) { index ->
+                            AccountsSelectionItem(
+                                modifier = Modifier
+                                    .focusRequester(if (index == 0) focusRequester else FocusRequester())
+                                    .padding(4.dp),
+                                key = index,
+                                accountsSectionData = accountsSectionListItems[index]
+                            )
+                        }
                     }
-                }
+                )
+            }
+
+            // Subscriber Info Edit Dialog
+            if (showSubscriberInfo) {
+                SubscriberInfoDialog(
+                    subscriberInfo = subscriberInfo,
+                    isUpdating = isUpdating,
+                    onDismiss = {
+                        showSubscriberInfo = false
+                        profileViewModel.resetUpdateState()
+                    },
+                    onSave = { updatedInfo ->
+                        subscriberInfo = updatedInfo
+                        profileViewModel.updateSubscriberInfo(updatedInfo)
+                    }
+                )
+            }
+
+            AccountsSectionDeleteDialog(
+                showDialog = showDeleteDialog,
+                onDismissRequest = { showDeleteDialog = false },
+                modifier = Modifier.width(428.dp)
             )
         }
-
-        // Subscriber Info Edit Dialog
-        if (showSubscriberInfo) {
-            SubscriberInfoDialog(
-                subscriberInfo = subscriberInfo,
-                onDismiss = { showSubscriberInfo = false },
-                onSave = { updatedInfo ->
-                    subscriberInfo = updatedInfo
-                    showSubscriberInfo = false
-                }
-            )
-        }
-
-        AccountsSectionDeleteDialog(
-            showDialog = showDeleteDialog,
-            onDismissRequest = { showDeleteDialog = false },
-            modifier = Modifier.width(428.dp)
-        )
     }
 }
 
@@ -300,7 +346,7 @@ fun QuickStatCard(
     Card(
         modifier = modifier.height(80.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A1A)
+            containerColor = Color(0xFF1A1A1A)  // Dark gray, not pure black for contrast
         )
     ) {
         Column(
@@ -336,6 +382,7 @@ fun QuickStatCard(
 @Composable
 fun SubscriberInfoDialog(
     subscriberInfo: SubscriberInfo,
+    isUpdating: Boolean = false,
     onDismiss: () -> Unit,
     onSave: (SubscriberInfo) -> Unit
 ) {
@@ -351,7 +398,9 @@ fun SubscriberInfoDialog(
     var stateCode by remember { mutableStateOf(subscriberInfo.stateCode) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (!isUpdating) onDismiss()
+        },
         title = {
             Text(
                 text = "Edit Subscriber Information",
@@ -391,7 +440,7 @@ fun SubscriberInfoDialog(
                                             Color(0xFF333333),
                                         shape = RoundedCornerShape(4.dp)
                                     )
-                                    .clickable {
+                                    .clickable(enabled = !isUpdating) {
                                         useAltLcoCode = if (index == 0) "0" else "1"
                                     }
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -409,56 +458,65 @@ fun SubscriberInfoDialog(
                     label = "Phone (10 digits)",
                     value = phone,
                     onValueChange = { if (it.length <= 10) phone = it },
-                    isNumber = true
+                    isNumber = true,
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "Email",
                     value = email,
-                    onValueChange = { email = it }
+                    onValueChange = { email = it },
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "First Name",
                     value = firstName,
-                    onValueChange = { firstName = it }
+                    onValueChange = { firstName = it },
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "Last Name",
                     value = lastName,
-                    onValueChange = { lastName = it }
+                    onValueChange = { lastName = it },
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "Address",
                     value = address,
                     onValueChange = { address = it },
-                    isMultiline = true
+                    isMultiline = true,
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "Partner Reference ID",
                     value = partnerReferenceId,
-                    onValueChange = { if (it.length <= 30) partnerReferenceId = it }
+                    onValueChange = { if (it.length <= 30) partnerReferenceId = it },
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "Zone",
                     value = zone,
-                    onValueChange = { zone = it }
+                    onValueChange = { zone = it },
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "Service Number",
                     value = serviceNumber,
-                    onValueChange = { serviceNumber = it }
+                    onValueChange = { serviceNumber = it },
+                    enabled = !isUpdating
                 )
 
                 SubscriberInfoField(
                     label = "State Code",
                     value = stateCode,
-                    onValueChange = { stateCode = it }
+                    onValueChange = { stateCode = it },
+                    enabled = !isUpdating
                 )
             }
         },
@@ -479,17 +537,28 @@ fun SubscriberInfoDialog(
                             stateCode = stateCode
                         )
                     )
-                }
+                },
+                enabled = !isUpdating
             ) {
-                Text("Save", color = Color(0xFFE50914))
+                if (isUpdating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color(0xFFE50914)
+                    )
+                } else {
+                    Text("Save", color = Color(0xFFE50914))
+                }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isUpdating
+            ) {
                 Text("Cancel", color = Color.White)
             }
         },
-        containerColor = Color(0xFF1A1A1A),
+        containerColor = Color(0xFF1A1A1A),  // Dark background for dialog
         titleContentColor = Color.White,
         textContentColor = Color.White
     )
@@ -501,7 +570,8 @@ fun SubscriberInfoField(
     value: String,
     onValueChange: (String) -> Unit,
     isNumber: Boolean = false,
-    isMultiline: Boolean = false
+    isMultiline: Boolean = false,
+    enabled: Boolean = true
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -531,9 +601,8 @@ fun SubscriberInfoField(
                     shape = RoundedCornerShape(4.dp)
                 )
                 .onFocusChanged { isFocused = it.isFocused }
-                .focusable()
-        )
-        {
+                .focusable(enabled = enabled)
+        ) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -550,7 +619,8 @@ fun SubscriberInfoField(
                     KeyboardOptions.Default
                 },
                 maxLines = if (isMultiline) 3 else 1,
-                singleLine = !isMultiline
+                singleLine = !isMultiline,
+                enabled = enabled
             )
         }
     }

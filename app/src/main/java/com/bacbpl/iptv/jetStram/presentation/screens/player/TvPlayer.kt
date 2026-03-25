@@ -1334,7 +1334,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -2376,13 +2375,13 @@ fun SwipeChannelOverlay(
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
         Surface(
             modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 12.dp, vertical = 8.dp) // 👈 আরও ছোট প্যাডিং
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp)), // 👈 শেপও ছোট
+                .wrapContentWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp)),
             color = Color.Black.copy(alpha = 0.85f),
             shape = RoundedCornerShape(32.dp)
         ) {
@@ -2390,15 +2389,15 @@ fun SwipeChannelOverlay(
                 modifier = Modifier
                     .wrapContentWidth()
                     .padding(horizontal = 24.dp, vertical = 12.dp),
-//                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 // Previous Channel Section
                 if (previousChannel != null) {
                     Row(
-//                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.wrapContentWidth()
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowLeft,
@@ -2409,7 +2408,6 @@ fun SwipeChannelOverlay(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Previous Channel Image - Fixed
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
@@ -2438,9 +2436,8 @@ fun SwipeChannelOverlay(
                             maxLines = 1
                         )
                     }
-                }
-                else {
-                    Spacer(modifier = Modifier.weight(1f))
+
+                    Spacer(modifier = Modifier.width(16.dp)) // Add spacing between sections
                 }
 
                 // Center Text
@@ -2449,16 +2446,17 @@ fun SwipeChannelOverlay(
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    letterSpacing = 1.sp
                 )
 
                 // Next Channel Section
                 if (nextChannel != null) {
+                    Spacer(modifier = Modifier.width(16.dp)) // Add spacing between sections
+
                     Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.weight(1f)
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.wrapContentWidth()
                     ) {
                         Text(
                             text = nextChannel.name.take(12) + if (nextChannel.name.length > 12) "..." else "",
@@ -2470,7 +2468,6 @@ fun SwipeChannelOverlay(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Next Channel Image - Fixed
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
@@ -2498,8 +2495,6 @@ fun SwipeChannelOverlay(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
