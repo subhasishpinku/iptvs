@@ -104,7 +104,7 @@ fun DynamicPlanCard(
                     plan.ottList.take(4).forEach { ott ->
                         // Use Coil for image loading
                         val painter = rememberAsyncImagePainter(
-                            model = "http://192.168.1.11:8080/ott-icons/${ott.ottThumbnail}",
+                            model = "http://iptv.yogayog.net/ott-icons/${ott.ottThumbnail}",
                             placeholder = painterResource(android.R.drawable.ic_menu_gallery),
                             error = painterResource(android.R.drawable.ic_menu_gallery)
                         )

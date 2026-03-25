@@ -139,7 +139,7 @@ fun WalletSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PaymentScreen() {
-    var selectedTab by remember { mutableStateOf("Credit Card") }
+    var selectedTab by remember { mutableStateOf("QR Code") }
 
     Box(
         modifier = Modifier
@@ -182,13 +182,13 @@ fun PaymentScreen() {
                     .padding(4.dp)
                     .align(Alignment.CenterHorizontally)
             ) {
-                PaymentTab(
-                    title = "💳 Card",
-                    selected = selectedTab == "Credit Card",
-                    onSelected = {
-                        selectedTab = "Credit Card"
-                    }
-                )
+//                PaymentTab(
+//                    title = "💳 Card",
+//                    selected = selectedTab == "Credit Card",
+//                    onSelected = {
+//                        selectedTab = "Credit Card"
+//                    }
+//                )
 
                 PaymentTab(
                     title = "📱 QR Code",
@@ -203,8 +203,9 @@ fun PaymentScreen() {
 
             // Payment Content based on selected tab
             when (selectedTab) {
-                "Credit Card" -> CreditCardContent()
                 "QR Code" -> QRCodePaymentContent()
+//               "Credit Card" -> CreditCardContent()
+
             }
 
             Spacer(modifier = Modifier.weight(1f))

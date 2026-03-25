@@ -197,6 +197,44 @@ fun MovieDetails(
                     )
 
                     // Now Playing / OTTplay Button
+//                    if (!ottplayUrl.isNullOrEmpty()) {
+//                        ActionButton(
+//                            icon = Icons.Outlined.OpenInBrowser,
+//                            text = stringResource(R.string.now_playing),
+//                            onClick = {
+//                                coroutineScope.launch {
+//                                    isLoadingAuthUrl = true
+//                                    try {
+//                                        val authorizedUrl = withContext(Dispatchers.IO) {
+//                                            getAuthorizedOttplayUrl(ottplayUrl, context)
+//                                        }
+//                                        if (authorizedUrl != null) {
+//                                            println("Opening authorized URL: $authorizedUrl")
+//                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authorizedUrl))
+//                                            context.startActivity(intent)
+//                                        } else {
+//                                            // Fallback to original URL if authorization fails
+//                                            println("Failed to get authorized URL, using original: $ottplayUrl")
+////                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
+////                                            context.startActivity(intent)
+//                                        }
+//                                    } catch (e: Exception) {
+//                                        println("Error getting authorized URL: ${e.message}")
+//                                        e.printStackTrace()
+//                                        // Fallback to original URL
+////                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
+////                                        context.startActivity(intent)
+//                                    } finally {
+//                                        isLoadingAuthUrl = false
+//                                    }
+//                                }
+//                            },
+//                            modifier = Modifier.weight(1f),
+//                            isLoading = isLoadingAuthUrl
+//                        )
+//                    }
+
+                    // Now Playing / OTTplay Button
                     if (!ottplayUrl.isNullOrEmpty()) {
                         ActionButton(
                             icon = Icons.Outlined.OpenInBrowser,
@@ -208,22 +246,26 @@ fun MovieDetails(
                                         val authorizedUrl = withContext(Dispatchers.IO) {
                                             getAuthorizedOttplayUrl(ottplayUrl, context)
                                         }
-                                        if (authorizedUrl != null) {
-                                            println("Opening authorized URL: $authorizedUrl")
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(authorizedUrl))
-                                            context.startActivity(intent)
+
+                                        // ADD THIS LOGGING
+                                        println("=== AUTHORIZED URL DEBUG ===")
+                                        println("Original URL: $ottplayUrl")
+                                        println("Authorized URL: $authorizedUrl")
+                                        println("Authorized URL is null: ${authorizedUrl == null}")
+                                        println("Authorized URL is empty: ${authorizedUrl.isNullOrEmpty()}")
+
+                                        if (!authorizedUrl.isNullOrEmpty()) {
+                                            println("Attempting to open: $authorizedUrl")
+                                            openOttApp(context, authorizedUrl)
                                         } else {
-                                            // Fallback to original URL if authorization fails
-                                            println("Failed to get authorized URL, using original: $ottplayUrl")
-                                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
-                                            context.startActivity(intent)
+                                            println("Authorized URL null → opening Play Store fallback")
+                                            openPlayStore(context)
                                         }
+
                                     } catch (e: Exception) {
-                                        println("Error getting authorized URL: ${e.message}")
+                                        println("Exception: ${e.message}")
                                         e.printStackTrace()
-                                        // Fallback to original URL
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ottplayUrl))
-                                        context.startActivity(intent)
+                                        openPlayStore(context)
                                     } finally {
                                         isLoadingAuthUrl = false
                                     }
@@ -238,78 +280,151 @@ fun MovieDetails(
         }
     }
 }
+fun openOttApp(context: Context, url: String) {
+    try {
+        println("Opening URL: $url")
 
+        // First try to open with the specific package
+        val uri = Uri.parse(url)
+
+        // Try to open with the specific app first
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            // Try different possible package names
+            val packages = listOf(
+                "com.ht.ottplay",  // Your specified package
+                "com.ottplay",     // Alternative package name
+                "com.ottplay.app"  // Another alternative
+            )
+
+            for (pkg in packages) {
+                try {
+                    context.packageManager.getPackageInfo(pkg, 0)
+                    setPackage(pkg)
+                    break
+                } catch (e: Exception) {
+                    println("Package $pkg not installed")
+                }
+            }
+
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+
+        // Check if there's any activity that can handle this intent
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+            println("Intent started successfully")
+        } else {
+            println("No activity found to handle the intent")
+            // Fallback to browser
+            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(browserIntent)
+        }
+
+    } catch (e: Exception) {
+        println("Error opening OTT app: ${e.message}")
+        e.printStackTrace()
+        openPlayStore(context)
+    }
+}
+fun openPlayStore(context: Context) {
+    try {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("market://details?id=com.ht.ottplay")
+        ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        context.startActivity(intent)
+
+    } catch (e: Exception) {
+        println("Play Store not found → opening web")
+
+        val webIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://www.ottplay.com/app")
+        ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        context.startActivity(webIntent)
+    }
+}
 // Function to get authorized OTTplay URL with Bearer Token using POST
-//private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context): String? {
-//    return try {
-//        val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
-//        val sharedPrefManager = SharedPrefManager(context)
-//        val token = sharedPrefManager.getToken()
-//        println("Original ottplayUrl: $ottplayUrl")
-//
-//        // Create OkHttpClient with timeout configurations
-//        val client = OkHttpClient.Builder()
-//            .connectTimeout(30, TimeUnit.SECONDS)
-//            .readTimeout(30, TimeUnit.SECONDS)
-//            .writeTimeout(30, TimeUnit.SECONDS)
-//            .build()
-//
-//        // Create form body with ottplay_url parameter
-//        val formBody = FormBody.Builder()
-//            .add("ottplay_url", ottplayUrl)
-//            .build()
-//
-//        // Build POST request with Bearer token
-//        val request = Request.Builder()
-//            .url(url)
-//            .addHeader("Authorization", "Bearer 132|ClUBpdoHQ4VpWhwhOdcz1Jc2rbbIb2bcG1YMzFGs9c6c4fa5")
-//            .addHeader("Content-Type", "application/x-www-form-urlencoded")
-//            .addHeader("Accept", "application/json")
-//            .post(formBody)
-//            .build()
-//
-//        println("Making POST request to: $url")
-//        println("Request body: ottplay_url=$ottplayUrl")
-//
-//        val response = client.newCall(request).execute()
-//        val responseBody = response.body?.string()
-//
-//        println("Response code: ${response.code}")
-//        println("Response body: $responseBody")
-//
-//        if (response.isSuccessful && responseBody != null) {
-//            // Parse the JSON response
-//            val jsonObject = JSONObject(responseBody)
-//            val success = jsonObject.optBoolean("success", false)
-//            val authorizedUrl = jsonObject.optString("url", null)
-//            val message = jsonObject.optString("message", "")
-//
-//            if (success && !authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
-//                println("Successfully got authorized URL: $authorizedUrl")
-//                authorizedUrl
-//            } else {
-//                println("Authorization failed - Success: $success, Message: $message")
-//                // Try to see if there's any URL in the response anyway
-//                if (!authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
-//                    println("Found URL even though success was false: $authorizedUrl")
-//                    authorizedUrl
-//                } else {
-//                    null
-//                }
-//            }
-//        } else {
-//            println("HTTP request failed with code: ${response.code}")
-//            println("Error response: $responseBody")
-//            null
-//        }
-//    } catch (e: Exception) {
-//        println("Exception in getAuthorizedOttplayUrl: ${e.message}")
-//        e.printStackTrace()
-//        null
-//    }
-//}
+private suspend fun getAuthorizedOttplayUrl1(ottplayUrl: String, context: Context): String? {
+    return try {
+        val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
+        val sharedPrefManager = SharedPrefManager(context)
+        val token = sharedPrefManager.getToken()
+        println("Original ottplayUrl: $ottplayUrl")
 
-private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context): String? {
+        // Create OkHttpClient with timeout configurations
+        val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        // Create form body with ottplay_url parameter
+        val formBody = FormBody.Builder()
+            .add("ottplay_url", ottplayUrl)
+            .build()
+
+        // Build POST request with Bearer token
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer 133|U8DI797R9Nf8Nm7yq2pEwA7FoMe57yYz80JTCF5Bdeb6e6c1")
+//            .addHeader("Authorization", "Bearer 132|ClUBpdoHQ4VpWhwhOdcz1Jc2rbbIb2bcG1YMzFGs9c6c4fa5")
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .addHeader("Accept", "application/json")
+            .post(formBody)
+            .build()
+
+        println("Making POST request to: $url")
+        println("Request body: ottplay_url=$ottplayUrl")
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+
+        println("Response code: ${response.code}")
+        println("Response body: $responseBody")
+
+        if (response.isSuccessful && responseBody != null) {
+            // Parse the JSON response
+            val jsonObject = JSONObject(responseBody)
+            val success = jsonObject.optBoolean("success", false)
+            val authorizedUrl = jsonObject.optString("url", null)
+            val message = jsonObject.optString("message", "")
+
+            if (success && !authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+                println("Successfully got authorized URL: $authorizedUrl")
+                authorizedUrl
+            } else {
+                println("Authorization failed - Success: $success, Message: $message")
+                // Try to see if there's any URL in the response anyway
+                if (!authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+                    println("Found URL even though success was false: $authorizedUrl")
+                    authorizedUrl
+                } else {
+                    null
+                }
+            }
+        } else {
+            println("HTTP request failed with code: ${response.code}")
+            println("Error response: $responseBody")
+            null
+        }
+    } catch (e: Exception) {
+        println("Exception in getAuthorizedOttplayUrl: ${e.message}")
+        e.printStackTrace()
+        null
+    }
+}
+
+private suspend fun getAuthorizedOttplayUrl2(ottplayUrl: String, context: Context): String? {
     return try {
         val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
 
@@ -320,6 +435,7 @@ private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context
         println("=== Getting Authorized URL ===")
         println("Original ottplayUrl: $ottplayUrl")
         println("Token from SharedPref: ${if (token != null) "Found (${token.take(20)}...)" else "NOT FOUND"}")
+        println("Token from SharedPref: ${if (token != null) "Found: $token" else "NOT FOUND"}")
 
         // Check if token exists
         if (token.isNullOrEmpty()) {
@@ -400,7 +516,84 @@ private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context
         null
     }
 }
+private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context): String? {
+    return try {
+        val url = "https://iptv.yogayog.net/api/get-ottplay-url-authorized/"
+        val sharedPrefManager = SharedPrefManager(context)
+        val token = sharedPrefManager.getToken()
 
+        println("=== GETTING AUTHORIZED URL ===")
+        println("Original URL: $ottplayUrl")
+        println("Token present: ${!token.isNullOrEmpty()}")
+
+        if (token.isNullOrEmpty()) {
+            println("ERROR: No authentication token found")
+            return null
+        }
+
+        val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+        val formBody = FormBody.Builder()
+            .add("ottplay_url", ottplayUrl)
+            .build()
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .addHeader("Accept", "application/json")
+            .post(formBody)
+            .build()
+
+        println("Making POST request...")
+
+        val response = client.newCall(request).execute()
+        val responseBody = response.body?.string()
+
+        println("Response code: ${response.code}")
+        println("Response body: $responseBody")
+
+        if (response.isSuccessful && responseBody != null) {
+            val jsonObject = JSONObject(responseBody)
+            val success = jsonObject.optBoolean("success", false)
+            var authorizedUrl = jsonObject.optString("url", null)
+            val message = jsonObject.optString("message", "")
+
+            println("Parsed - Success: $success, Message: $message")
+            println("Parsed - URL: $authorizedUrl")
+
+            // Check if the URL is valid and not the string "null"
+            if (success && !authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+                println("✅ Valid authorized URL: $authorizedUrl")
+                return authorizedUrl
+            } else {
+                println("❌ Authorization failed or invalid URL")
+                println("Success: $success, URL: $authorizedUrl")
+
+                // Try to extract URL even if success is false
+                if (!authorizedUrl.isNullOrEmpty() && authorizedUrl != "null") {
+                    println("Found URL despite success=false: $authorizedUrl")
+                    return authorizedUrl
+                }
+
+                return null
+            }
+        } else {
+            println("HTTP request failed with code: ${response.code}")
+            println("Error response: $responseBody")
+            return null
+        }
+
+    } catch (e: Exception) {
+        println("Exception in getAuthorizedOttplayUrl: ${e.message}")
+        e.printStackTrace()
+        return null
+    }
+}
 @Composable
 private fun ActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,

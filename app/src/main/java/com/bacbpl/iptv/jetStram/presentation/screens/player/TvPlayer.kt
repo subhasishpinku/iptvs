@@ -1422,7 +1422,6 @@ class TvPlayer : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun TvPlayerScreen(
     initialChannel: TvChannel,
@@ -1435,7 +1434,8 @@ fun TvPlayerScreen(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var showGrid by remember { mutableStateOf(false) }
     var showChannelPreview by remember { mutableStateOf(false) }
-    var previewDirection by remember { mutableStateOf("") } // "next" or "previous"
+    var previewDirection by remember { mutableStateOf("") }
+    var showMenuBar by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val menuFocusRequester = remember { FocusRequester() }
     val gridFocusRequester = remember { FocusRequester() }
@@ -1524,6 +1524,16 @@ fun TvPlayerScreen(
         }
     }
 
+    // Auto-hide menu bar after inactivity
+    LaunchedEffect(showMenuBar) {
+        if (showMenuBar) {
+            delay(5000) // Hide after 5 seconds of inactivity
+            showMenuBar = false
+            selectedCategory = null
+            showGrid = false
+        }
+    }
+
     // Handle menu item focus
     LaunchedEffect(selectedCategory) {
         if (selectedCategory != null && !showGrid) {
@@ -1563,8 +1573,18 @@ fun TvPlayerScreen(
             .onPreviewKeyEvent { keyEvent ->
                 // Handle key events at preview level for better focus management
                 when {
+                    // Show menu bar when UP is pressed
                     keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionUp -> {
-                        if (showGrid) {
+                        if (!showMenuBar) {
+                            showMenuBar = true
+                            // If there are available categories, select the first one
+                            if (availableMainCategories.isNotEmpty()) {
+                                selectedCategory = availableMainCategories[0].first
+                                menuFocusedIndex = 0
+                                menuItemsFocusRequesters[0].requestFocus()
+                            }
+                            true
+                        } else if (showGrid) {
                             // If grid is showing, move focus to menu and hide grid
                             showGrid = false
                             selectedCategory = availableMainCategories.getOrNull(menuFocusedIndex)?.first
@@ -1595,6 +1615,15 @@ fun TvPlayerScreen(
                             false
                         }
                     }
+                    // Hide menu bar when pressing BACK while menu is visible
+                    keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Back -> {
+                        if (showMenuBar && !showGrid && selectedCategory == null) {
+                            showMenuBar = false
+                            true
+                        } else {
+                            false
+                        }
+                    }
                     else -> false
                 }
             }
@@ -1610,6 +1639,9 @@ fun TvPlayerScreen(
                         } else if (selectedCategory != null) {
                             selectedCategory = null
                             focusRequester.requestFocus()
+                            true
+                        } else if (showMenuBar) {
+                            showMenuBar = false
                             true
                         } else {
                             // Stop video and finish activity when back is pressed
@@ -1630,6 +1662,12 @@ fun TvPlayerScreen(
                             showChannelPreview = true
                             currentIndex++
                             currentChannel = allChannels[currentIndex]
+                            // Hide menu bar when changing channels
+                            if (showMenuBar) {
+                                showMenuBar = false
+                                selectedCategory = null
+                                showGrid = false
+                            }
                         }
                         true
                     }
@@ -1639,11 +1677,17 @@ fun TvPlayerScreen(
                             showChannelPreview = true
                             currentIndex--
                             currentChannel = allChannels[currentIndex]
+                            // Hide menu bar when changing channels
+                            if (showMenuBar) {
+                                showMenuBar = false
+                                selectedCategory = null
+                                showGrid = false
+                            }
                         }
                         true
                     }
 
-                    // Navigate categories with left/right when menu is focused
+                    // Navigate categories with left/right when a category is selected
                     selectedCategory != null && !showGrid &&
                             keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionRight -> {
                         val currentCatIndex = availableMainCategories.indexOfFirst { it.first == selectedCategory }
@@ -1667,30 +1711,142 @@ fun TvPlayerScreen(
                         true
                     }
 
-                    // Channel navigation when no menu is shown
-                    selectedCategory == null && !showGrid &&
+                    // Channel navigation with left/right when:
+                    // 1. No category selected AND
+                    // 2. Either menu bar is hidden OR menu bar is visible but no category selected (menu bar just showing)
+                    (selectedCategory == null && !showGrid && (!showMenuBar || (showMenuBar && selectedCategory == null))) &&
                             keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionRight -> {
                         if (currentIndex < allChannels.size - 1) {
                             previewDirection = "next"
                             showChannelPreview = true
                             currentIndex++
                             currentChannel = allChannels[currentIndex]
+                            // If menu bar is visible, keep it visible but don't let it block channel change
                         }
                         true
                     }
-                    selectedCategory == null && !showGrid &&
+                    (selectedCategory == null && !showGrid && (!showMenuBar || (showMenuBar && selectedCategory == null))) &&
                             keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionLeft -> {
                         if (currentIndex > 0) {
                             previewDirection = "previous"
                             showChannelPreview = true
                             currentIndex--
                             currentChannel = allChannels[currentIndex]
+                            // If menu bar is visible, keep it visible but don't let it block channel change
                         }
                         true
                     }
                     else -> false
                 }
             }
+//            .onKeyEvent { keyEvent ->
+//                when {
+//                    // Handle back button to stop video and exit
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Back -> {
+//                        if (showGrid) {
+//                            showGrid = false
+//                            // Return focus to menu
+//                            menuItemsFocusRequesters.getOrNull(menuFocusedIndex)?.requestFocus()
+//                            true
+//                        } else if (selectedCategory != null) {
+//                            selectedCategory = null
+//                            focusRequester.requestFocus()
+//                            true
+//                        } else if (showMenuBar) {
+//                            showMenuBar = false
+//                            true
+//                        } else {
+//                            // Stop video and finish activity when back is pressed
+//                            exoPlayer.run {
+//                                playWhenReady = false
+//                                stop()
+//                                release()
+//                            }
+//                            (context as? android.app.Activity)?.finish()
+//                            true
+//                        }
+//                    }
+//
+//                    // Handle CHANNEL_UP and CHANNEL_DOWN
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_CHANNEL_UP -> {
+//                        if (currentIndex < allChannels.size - 1) {
+//                            previewDirection = "next"
+//                            showChannelPreview = true
+//                            currentIndex++
+//                            currentChannel = allChannels[currentIndex]
+//                            // Hide menu bar when changing channels
+//                            if (showMenuBar) {
+//                                showMenuBar = false
+//                                selectedCategory = null
+//                                showGrid = false
+//                            }
+//                        }
+//                        true
+//                    }
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+//                        if (currentIndex > 0) {
+//                            previewDirection = "previous"
+//                            showChannelPreview = true
+//                            currentIndex--
+//                            currentChannel = allChannels[currentIndex]
+//                            // Hide menu bar when changing channels
+//                            if (showMenuBar) {
+//                                showMenuBar = false
+//                                selectedCategory = null
+//                                showGrid = false
+//                            }
+//                        }
+//                        true
+//                    }
+//
+//                    // Navigate categories with left/right when menu is focused
+//                    selectedCategory != null && !showGrid &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionRight -> {
+//                        val currentCatIndex = availableMainCategories.indexOfFirst { it.first == selectedCategory }
+//                        if (currentCatIndex < availableMainCategories.size - 1) {
+//                            val newIndex = currentCatIndex + 1
+//                            selectedCategory = availableMainCategories[newIndex].first
+//                            menuFocusedIndex = newIndex
+//                            menuItemsFocusRequesters.getOrNull(newIndex)?.requestFocus()
+//                        }
+//                        true
+//                    }
+//                    selectedCategory != null && !showGrid &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionLeft -> {
+//                        val currentCatIndex = availableMainCategories.indexOfFirst { it.first == selectedCategory }
+//                        if (currentCatIndex > 0) {
+//                            val newIndex = currentCatIndex - 1
+//                            selectedCategory = availableMainCategories[newIndex].first
+//                            menuFocusedIndex = newIndex
+//                            menuItemsFocusRequesters.getOrNull(newIndex)?.requestFocus()
+//                        }
+//                        true
+//                    }
+//
+//                    // Channel navigation when no menu is shown
+//                    selectedCategory == null && !showGrid && !showMenuBar &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionRight -> {
+//                        if (currentIndex < allChannels.size - 1) {
+//                            previewDirection = "next"
+//                            showChannelPreview = true
+//                            currentIndex++
+//                            currentChannel = allChannels[currentIndex]
+//                        }
+//                        true
+//                    }
+//                    selectedCategory == null && !showGrid && !showMenuBar &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionLeft -> {
+//                        if (currentIndex > 0) {
+//                            previewDirection = "previous"
+//                            showChannelPreview = true
+//                            currentIndex--
+//                            currentChannel = allChannels[currentIndex]
+//                        }
+//                        true
+//                    }
+//                    else -> false
+//                }
+//            }
     ) {
         // AndroidView for ExoPlayer
         AndroidView(
@@ -1711,31 +1867,33 @@ fun TvPlayerScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Top Action Bar with Categories (Always Visible)
-        TopActionBar(
-            categories = availableMainCategories,
-            selectedCategory = selectedCategory,
-            onCategorySelected = { category ->
-                selectedCategory = category
-                showGrid = false
-                val index = availableMainCategories.indexOfFirst { it.first == category }
-                if (index >= 0) {
+        // Top Action Bar with Categories - Only visible when showMenuBar is true
+        if (showMenuBar) {
+            TopActionBar(
+                categories = availableMainCategories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { category ->
+                    selectedCategory = category
+                    showGrid = false
+                    val index = availableMainCategories.indexOfFirst { it.first == category }
+                    if (index >= 0) {
+                        menuFocusedIndex = index
+                    }
+                },
+                focusRequesters = menuItemsFocusRequesters,
+                focusedIndex = menuFocusedIndex,
+                onFocusChanged = { index ->
                     menuFocusedIndex = index
-                }
-            },
-            focusRequesters = menuItemsFocusRequesters,
-            focusedIndex = menuFocusedIndex,
-            onFocusChanged = { index ->
-                menuFocusedIndex = index
-                if (index >= 0 && index < availableMainCategories.size) {
-                    selectedCategory = availableMainCategories[index].first
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .padding(5.dp)
-        )
+                    if (index >= 0 && index < availableMainCategories.size) {
+                        selectedCategory = availableMainCategories[index].first
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .padding(5.dp)
+            )
+        }
 
         // Channel Grid (Shows when category is selected and down pressed)
         if (selectedCategory != null && showGrid) {
@@ -1752,6 +1910,7 @@ fun TvPlayerScreen(
                         currentChannel = channel
                         showGrid = false
                         selectedCategory = null
+                        showMenuBar = false // Hide menu bar after selection
                         focusRequester.requestFocus()
                     }
                 },
@@ -1774,7 +1933,7 @@ fun TvPlayerScreen(
             channel = currentChannel,
             currentIndex = currentIndex,
             totalChannels = allChannels.size,
-            showMenu = selectedCategory != null || showGrid,
+            showMenu = selectedCategory != null || showGrid || showMenuBar,
             onNext = {
                 if (currentIndex < allChannels.size - 1) {
                     previewDirection = "next"
@@ -1806,13 +1965,14 @@ fun TvPlayerScreen(
         }
 
         // Show swipe overlay only when menu/grid is not visible
-        if (selectedCategory == null && !showGrid && !showChannelPreview) {
+        if (selectedCategory == null && !showGrid && !showChannelPreview && !showMenuBar) {
             SwipeChannelOverlay(
                 nextChannel = nextChannel,
                 previousChannel = previousChannel,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
+
         // Permanent bottom right corner logo
         PermanentChannelLogo(
             channel = currentChannel,
@@ -1820,6 +1980,403 @@ fun TvPlayerScreen(
         )
     }
 }
+//@Composable
+//fun TvPlayerScreen(
+//    initialChannel: TvChannel,
+//    allChannels: List<TvChannel>,
+//    initialIndex: Int
+//) {
+//    val context = LocalContext.current
+//    var currentChannel by remember { mutableStateOf(initialChannel) }
+//    var currentIndex by remember { mutableStateOf(initialIndex) }
+//    var selectedCategory by remember { mutableStateOf<String?>(null) }
+//    var showGrid by remember { mutableStateOf(false) }
+//    var showChannelPreview by remember { mutableStateOf(false) }
+//    var previewDirection by remember { mutableStateOf("") } // "next" or "previous"
+//    val focusRequester = remember { FocusRequester() }
+//    val menuFocusRequester = remember { FocusRequester() }
+//    val gridFocusRequester = remember { FocusRequester() }
+//
+//    // Get next and previous channels
+//    val nextChannel = remember(currentIndex, allChannels) {
+//        if (currentIndex < allChannels.size - 1) allChannels[currentIndex + 1] else null
+//    }
+//
+//    val previousChannel = remember(currentIndex, allChannels) {
+//        if (currentIndex > 0) allChannels[currentIndex - 1] else null
+//    }
+//
+//    // Predefined main categories with icons
+//    val mainCategories = listOf(
+//        "Movies" to Icons.Default.Movie,
+//        "Sports" to Icons.Default.SportsSoccer,
+//        "News" to Icons.Default.Info,
+//        "Entertainment" to Icons.Default.Tv,
+//        "Music" to Icons.Default.MusicNote,
+//        "Kids" to Icons.Default.ChildCare,
+//        "Lifestyle" to Icons.Default.Favorite,
+//        "Religious" to Icons.Default.Church
+//    )
+//
+//    // Filter categories that exist in channels
+//    val availableMainCategories = mainCategories.filter { (category, _) ->
+//        allChannels.any { it.category.trim().equals(category.trim(), ignoreCase = true) }
+//    }
+//
+//    // Add focus states for menu items
+//    var menuFocusedIndex by remember { mutableStateOf(0) }
+//    val menuItemsFocusRequesters = remember { List(availableMainCategories.size) { FocusRequester() } }
+//
+//    // Create ExoPlayer instance
+//    val exoPlayer = remember {
+//        ExoPlayer.Builder(context).build().apply {
+//            playWhenReady = true
+//            repeatMode = Player.REPEAT_MODE_OFF
+//        }
+//    }
+//
+//    // Function to load channel
+//    fun loadChannel(streamUrl: String) {
+//        try {
+//            val mediaItem = MediaItem.fromUri(Uri.parse(streamUrl))
+//            exoPlayer.setMediaItem(mediaItem)
+//            exoPlayer.prepare()
+//            exoPlayer.playWhenReady = true
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//    }
+//
+//    // Load initial channel
+//    LaunchedEffect(Unit) {
+//        loadChannel(currentChannel.streamUrl)
+//    }
+//
+//    // Handle channel changes
+//    LaunchedEffect(currentChannel.streamUrl) {
+//        loadChannel(currentChannel.streamUrl)
+//    }
+//
+//    // Release player when composable is disposed
+//    DisposableEffect(Unit) {
+//        onDispose {
+//            exoPlayer.run {
+//                playWhenReady = false
+//                stop()
+//                release()
+//            }
+//        }
+//    }
+//
+//    // Request focus when screen loads
+//    LaunchedEffect(Unit) {
+//        focusRequester.requestFocus()
+//    }
+//
+//    // Auto-hide channel preview
+//    LaunchedEffect(showChannelPreview) {
+//        if (showChannelPreview) {
+//            delay(2000)
+//            showChannelPreview = false
+//        }
+//    }
+//
+//    // Handle menu item focus
+//    LaunchedEffect(selectedCategory) {
+//        if (selectedCategory != null && !showGrid) {
+//            val index = availableMainCategories.indexOfFirst { it.first == selectedCategory }
+//            if (index >= 0) {
+//                menuFocusedIndex = index
+//                menuItemsFocusRequesters.getOrNull(index)?.requestFocus()
+//            }
+//        }
+//    }
+//
+//    // Check if streamUrl is empty
+//    if (currentChannel.streamUrl.isEmpty()) {
+//        Box(
+//            modifier = Modifier.fillMaxSize(),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text(
+//                text = "Invalid stream URL",
+//                style = MaterialTheme.typography.bodyLarge,
+//                color = Color.White
+//            )
+//        }
+//        return
+//    }
+//
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .focusRequester(
+//                when {
+//                    showGrid -> gridFocusRequester
+//                    selectedCategory != null -> menuItemsFocusRequesters.getOrNull(menuFocusedIndex) ?: menuFocusRequester
+//                    else -> focusRequester
+//                }
+//            )
+//            .onPreviewKeyEvent { keyEvent ->
+//                // Handle key events at preview level for better focus management
+//                when {
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionUp -> {
+//                        if (showGrid) {
+//                            // If grid is showing, move focus to menu and hide grid
+//                            showGrid = false
+//                            selectedCategory = availableMainCategories.getOrNull(menuFocusedIndex)?.first
+//                            menuItemsFocusRequesters.getOrNull(menuFocusedIndex)?.requestFocus()
+//                            true
+//                        } else if (selectedCategory != null) {
+//                            // Already have menu focused, keep it
+//                            menuItemsFocusRequesters.getOrNull(menuFocusedIndex)?.requestFocus()
+//                            true
+//                        } else {
+//                            // No menu selected, select the first category and focus it
+//                            if (availableMainCategories.isNotEmpty()) {
+//                                selectedCategory = availableMainCategories[0].first
+//                                menuFocusedIndex = 0
+//                                menuItemsFocusRequesters[0].requestFocus()
+//                                true
+//                            } else {
+//                                false
+//                            }
+//                        }
+//                    }
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionDown -> {
+//                        if (selectedCategory != null && !showGrid) {
+//                            // Show grid when down pressed
+//                            showGrid = true
+//                            true
+//                        } else {
+//                            false
+//                        }
+//                    }
+//                    else -> false
+//                }
+//            }
+//            .onKeyEvent { keyEvent ->
+//                when {
+//                    // Handle back button to stop video and exit
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Back -> {
+//                        if (showGrid) {
+//                            showGrid = false
+//                            // Return focus to menu
+//                            menuItemsFocusRequesters.getOrNull(menuFocusedIndex)?.requestFocus()
+//                            true
+//                        } else if (selectedCategory != null) {
+//                            selectedCategory = null
+//                            focusRequester.requestFocus()
+//                            true
+//                        } else {
+//                            // Stop video and finish activity when back is pressed
+//                            exoPlayer.run {
+//                                playWhenReady = false
+//                                stop()
+//                                release()
+//                            }
+//                            (context as? android.app.Activity)?.finish()
+//                            true
+//                        }
+//                    }
+//
+//                    // Handle CHANNEL_UP and CHANNEL_DOWN
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_CHANNEL_UP -> {
+//                        if (currentIndex < allChannels.size - 1) {
+//                            previewDirection = "next"
+//                            showChannelPreview = true
+//                            currentIndex++
+//                            currentChannel = allChannels[currentIndex]
+//                        }
+//                        true
+//                    }
+//                    keyEvent.type == KeyEventType.KeyDown && keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+//                        if (currentIndex > 0) {
+//                            previewDirection = "previous"
+//                            showChannelPreview = true
+//                            currentIndex--
+//                            currentChannel = allChannels[currentIndex]
+//                        }
+//                        true
+//                    }
+//
+//                    // Navigate categories with left/right when menu is focused
+//                    selectedCategory != null && !showGrid &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionRight -> {
+//                        val currentCatIndex = availableMainCategories.indexOfFirst { it.first == selectedCategory }
+//                        if (currentCatIndex < availableMainCategories.size - 1) {
+//                            val newIndex = currentCatIndex + 1
+//                            selectedCategory = availableMainCategories[newIndex].first
+//                            menuFocusedIndex = newIndex
+//                            menuItemsFocusRequesters.getOrNull(newIndex)?.requestFocus()
+//                        }
+//                        true
+//                    }
+//                    selectedCategory != null && !showGrid &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionLeft -> {
+//                        val currentCatIndex = availableMainCategories.indexOfFirst { it.first == selectedCategory }
+//                        if (currentCatIndex > 0) {
+//                            val newIndex = currentCatIndex - 1
+//                            selectedCategory = availableMainCategories[newIndex].first
+//                            menuFocusedIndex = newIndex
+//                            menuItemsFocusRequesters.getOrNull(newIndex)?.requestFocus()
+//                        }
+//                        true
+//                    }
+//
+//                    // Channel navigation when no menu is shown
+//                    selectedCategory == null && !showGrid &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionRight -> {
+//                        if (currentIndex < allChannels.size - 1) {
+//                            previewDirection = "next"
+//                            showChannelPreview = true
+//                            currentIndex++
+//                            currentChannel = allChannels[currentIndex]
+//                        }
+//                        true
+//                    }
+//                    selectedCategory == null && !showGrid &&
+//                            keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.DirectionLeft -> {
+//                        if (currentIndex > 0) {
+//                            previewDirection = "previous"
+//                            showChannelPreview = true
+//                            currentIndex--
+//                            currentChannel = allChannels[currentIndex]
+//                        }
+//                        true
+//                    }
+//                    else -> false
+//                }
+//            }
+//    ) {
+//        // AndroidView for ExoPlayer
+//        AndroidView(
+//            factory = { context ->
+//                StyledPlayerView(context).apply {
+//                    player = exoPlayer
+//                    useController = true
+//                    resizeMode = com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+//                    setShowBuffering(StyledPlayerView.SHOW_BUFFERING_WHEN_PLAYING)
+//                    keepScreenOn = true
+//                    isFocusable = true
+//                    isFocusableInTouchMode = true
+//                }
+//            },
+//            update = { view ->
+//                view.player = exoPlayer
+//            },
+//            modifier = Modifier.fillMaxSize()
+//        )
+//
+//        // Top Action Bar with Categories (Always Visible)
+//        TopActionBar(
+//            categories = availableMainCategories,
+//            selectedCategory = selectedCategory,
+//            onCategorySelected = { category ->
+//                selectedCategory = category
+//                showGrid = false
+//                val index = availableMainCategories.indexOfFirst { it.first == category }
+//                if (index >= 0) {
+//                    menuFocusedIndex = index
+//                }
+//            },
+//            focusRequesters = menuItemsFocusRequesters,
+//            focusedIndex = menuFocusedIndex,
+//            onFocusChanged = { index ->
+//                menuFocusedIndex = index
+//                if (index >= 0 && index < availableMainCategories.size) {
+//                    selectedCategory = availableMainCategories[index].first
+//                }
+//            },
+//            modifier = Modifier
+//                .align(Alignment.TopCenter)
+//                .fillMaxWidth()
+//                .padding(5.dp)
+//        )
+//
+//        // Channel Grid (Shows when category is selected and down pressed)
+//        if (selectedCategory != null && showGrid) {
+//            val categoryChannels = allChannels.filter {
+//                it.category.trim().equals(selectedCategory, ignoreCase = true)
+//            }
+//
+//            ChannelGrid(
+//                channels = categoryChannels,
+//                onChannelSelected = { channel ->
+//                    val newIndex = allChannels.indexOfFirst { it.id == channel.id }
+//                    if (newIndex != -1) {
+//                        currentIndex = newIndex
+//                        currentChannel = channel
+//                        showGrid = false
+//                        selectedCategory = null
+//                        focusRequester.requestFocus()
+//                    }
+//                },
+//                onClose = {
+//                    showGrid = false
+//                    // Return focus to menu
+//                    menuItemsFocusRequesters.getOrNull(menuFocusedIndex)?.requestFocus()
+//                },
+//                focusRequester = gridFocusRequester,
+//                modifier = Modifier
+//                    .align(Alignment.Center)
+//                    .padding(top = 100.dp)
+//                    .fillMaxWidth()
+//                    .height(500.dp)
+//            )
+//        }
+//
+//        // Top overlay for channel info (temporary)
+//        ChannelInfoOverlay(
+//            channel = currentChannel,
+//            currentIndex = currentIndex,
+//            totalChannels = allChannels.size,
+//            showMenu = selectedCategory != null || showGrid,
+//            onNext = {
+//                if (currentIndex < allChannels.size - 1) {
+//                    previewDirection = "next"
+//                    showChannelPreview = true
+//                    currentIndex++
+//                    currentChannel = allChannels[currentIndex]
+//                }
+//            },
+//            onPrevious = {
+//                if (currentIndex > 0) {
+//                    previewDirection = "previous"
+//                    showChannelPreview = true
+//                    currentIndex--
+//                    currentChannel = allChannels[currentIndex]
+//                }
+//            },
+//            modifier = Modifier.align(Alignment.TopCenter)
+//        )
+//
+//        // Channel Preview Overlay
+//        if (showChannelPreview) {
+//            ChannelPreviewOverlay(
+//                currentChannel = currentChannel,
+//                nextChannel = nextChannel,
+//                previousChannel = previousChannel,
+//                direction = previewDirection,
+//                modifier = Modifier.align(Alignment.BottomCenter)
+//            )
+//        }
+//
+//        // Show swipe overlay only when menu/grid is not visible
+//        if (selectedCategory == null && !showGrid && !showChannelPreview) {
+//            SwipeChannelOverlay(
+//                nextChannel = nextChannel,
+//                previousChannel = previousChannel,
+//                modifier = Modifier.align(Alignment.BottomCenter)
+//            )
+//        }
+//        // Permanent bottom right corner logo
+//        PermanentChannelLogo(
+//            channel = currentChannel,
+//            modifier = Modifier.align(Alignment.BottomEnd)
+//        )
+//    }
+//}
 
 @Composable
 fun TopActionBar(
@@ -2111,7 +2668,7 @@ fun ChannelPreviewOverlay(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(100.dp)
             .padding(horizontal = 20.dp),
         color = Color.Black.copy(alpha = 0.8f),
         shape = RoundedCornerShape(16.dp)
@@ -2188,7 +2745,7 @@ fun ChannelPreviewItem(
     ) {
         Surface(
             modifier = Modifier
-                .size(if (isCurrent) 120.dp else 100.dp)
+                .size(if (isCurrent) 90.dp else 60.dp)
                 .scale(scale)
                 .then(
                     if (borderColor != Color.Transparent) {
@@ -2368,7 +2925,7 @@ fun ChannelInfoOverlay(
     }
 }
 @Composable
-fun SwipeChannelOverlay(
+    fun SwipeChannelOverlay(
     nextChannel: TvChannel?,
     previousChannel: TvChannel?,
     modifier: Modifier = Modifier
@@ -2441,13 +2998,38 @@ fun SwipeChannelOverlay(
                 }
 
                 // Center Text
-                Text(
-                    text = "←  SWIPE TO CHANGE  →",
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
+                // Center Section with Icons
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowCircleLeft,
+                        contentDescription = "Swipe Left",
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "SWIPE TO CHANGE",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Icon(
+                        imageVector = Icons.Default.ArrowCircleRight,
+                        contentDescription = "Swipe Right",
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
 
                 // Next Channel Section
                 if (nextChannel != null) {

@@ -36,7 +36,7 @@ enum class ProfileScreens(
 
     Subscribe(Icons.Default.Subscriptions),
     Wallet(Icons.Outlined.AccountBalanceWallet, "Payment"),
-    Device(Icons.Outlined.Devices, "Multiple Screen"),
+    Device(Icons.Outlined.Devices, "Device Info"),
 
     About(Icons.Default.Info),
     Subtitles(Icons.Default.Subtitles),

@@ -75,7 +75,7 @@ import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamTheme
 @Composable
 fun ProfileScreen(
     @FloatRange(from = 0.0, to = 1.0)
-    sidebarWidthFraction: Float = 0.15f
+    sidebarWidthFraction: Float = 0.17f
 ) {
     val childPadding = rememberChildPadding()
     val profileNavController = rememberNavController()

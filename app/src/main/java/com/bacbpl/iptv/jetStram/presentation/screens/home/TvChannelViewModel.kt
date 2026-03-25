@@ -105,15 +105,15 @@ class TvChannelViewModel @Inject constructor() : ViewModel() {
             TvChannel(
                 id = "10",
                 name = "Inception",
-                logoUrl = "http://192.168.1.11:8080/banners/inception/Inception-LeonardoDiCaprio-ChristopherNolan-HollywoodSciFiMoviePoster_66029b94-50ae-494c-b11d-60a3d91268b5.jpg",
+                logoUrl = "http://iptv.yogayog.net/banners/inception/Inception-LeonardoDiCaprio-ChristopherNolan-HollywoodSciFiMoviePoster_66029b94-50ae-494c-b11d-60a3d91268b5.jpg",
                 streamUrl = "http://192.168.1.8:8080/vod/vod_inception/inception.mp4",
                 category = "Movies"
             ),
             TvChannel(
                 id = "11",
                 name = "Dhurandar",
-                logoUrl = "http://192.168.1.8:8080/banners/dhurandar/dhurandhar1763462432_2.jpeg",
-                streamUrl = "http://192.168.1.11:8080/vod/vod_dhurandar/dh1.mp4",
+                logoUrl = "http://iptv.yogayog.net/banners/dhurandar/dhurandhar1763462432_2.jpeg",
+                streamUrl = "http://iptv.yogayog.net/vod/vod_dhurandar/dh1.mp4",
                 category = "Movies"
             )
         )
