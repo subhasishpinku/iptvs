@@ -69,7 +69,7 @@ object StringConstants {
         fun reviewCount(count: String) = "$count reviews"
 
         object Placeholders {
-            const val AboutSectionTitle = "About JetStream"
+            const val AboutSectionTitle = "BACBPL"
             const val AboutSectionDescription = "Welcome to Jetstream! We are a new and" +
                     " exciting streaming platform that offers a vast selection of movies," +
                     " TV shows, and original content for you to enjoy. Our team is dedicated" +

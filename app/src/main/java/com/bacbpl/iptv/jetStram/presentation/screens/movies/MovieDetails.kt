@@ -256,7 +256,9 @@ fun MovieDetails(
 
                                         if (!authorizedUrl.isNullOrEmpty()) {
                                             println("Attempting to open: $authorizedUrl")
-                                            openOttApp(context, authorizedUrl)
+                                            val cleanUrl = getCleanUrl(authorizedUrl)
+                                            openOttApp(context, cleanUrl)
+//                                            openOttApp(context, authorizedUrl)
                                         } else {
                                             println("Authorized URL null → opening Play Store fallback")
                                             openPlayStore(context)
@@ -286,6 +288,7 @@ fun openOttApp(context: Context, url: String) {
 
         // First try to open with the specific package
         val uri = Uri.parse(url)
+        println("URLs: $url")
 
         // Try to open with the specific app first
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
@@ -352,6 +355,10 @@ fun openPlayStore(context: Context) {
 
         context.startActivity(webIntent)
     }
+}
+
+fun getCleanUrl(url: String): String {
+    return url.substringBefore("?")
 }
 // Function to get authorized OTTplay URL with Bearer Token using POST
 private suspend fun getAuthorizedOttplayUrl1(ottplayUrl: String, context: Context): String? {
@@ -525,6 +532,7 @@ private suspend fun getAuthorizedOttplayUrl(ottplayUrl: String, context: Context
         println("=== GETTING AUTHORIZED URL ===")
         println("Original URL: $ottplayUrl")
         println("Token present: ${!token.isNullOrEmpty()}")
+        println("Token present: ${token}")
 
         if (token.isNullOrEmpty()) {
             println("ERROR: No authentication token found")

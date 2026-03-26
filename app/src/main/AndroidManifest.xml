@@ -98,22 +98,22 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:focusable="true"
             android:focusableInTouchMode="true" />
-        <activity
-            android:name=".ui.activities.OTTplayDeepLinkActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Leanback.NoActionBar"
-            android:launchMode="singleTask"
-            android:configChanges="orientation|screenSize|keyboardHidden">
+<!--        <activity-->
+<!--            android:name=".ui.activities.OTTplayDeepLinkActivity"-->
+<!--            android:exported="true"-->
+<!--            android:theme="@style/Theme.Leanback.NoActionBar"-->
+<!--            android:launchMode="singleTask"-->
+<!--            android:configChanges="orientation|screenSize|keyboardHidden">-->
 
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="www.ottplay.com" />
-            </intent-filter>
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--                <data android:scheme="https" />-->
+<!--                <data android:host="www.ottplay.com" />-->
+<!--            </intent-filter>-->
 
-        </activity>
+<!--        </activity>-->
         <activity
             android:name="com.google.android.gms.common.api.GoogleApiActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"

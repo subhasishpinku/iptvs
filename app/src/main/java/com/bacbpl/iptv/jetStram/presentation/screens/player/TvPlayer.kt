@@ -2956,12 +2956,12 @@ fun ChannelInfoOverlay(
                         horizontalArrangement = Arrangement.Start,
                         modifier = Modifier.wrapContentWidth()
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowLeft,
-                            contentDescription = "Previous",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
+//                        Icon(
+//                            imageVector = Icons.Default.KeyboardArrowLeft,
+//                            contentDescription = "Previous",
+//                            tint = Color.White,
+//                            modifier = Modifier.size(24.dp)
+//                        )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
@@ -3070,12 +3070,12 @@ fun ChannelInfoOverlay(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Next",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
+//                        Icon(
+//                            imageVector = Icons.Default.KeyboardArrowRight,
+//                            contentDescription = "Next",
+//                            tint = Color.White,
+//                            modifier = Modifier.size(24.dp)
+//                        )
                     }
                 }
             }
