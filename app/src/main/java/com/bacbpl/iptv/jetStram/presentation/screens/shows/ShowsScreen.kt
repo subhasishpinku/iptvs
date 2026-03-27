@@ -1445,7 +1445,7 @@ fun ShowsScreen(
                     item(contentType = "TvChannelsRow") {
                         TvChannelsRow(
                             title = "Live TV Channels",
-                            channels = channels.take(10),
+                            channels = channels.take(12),
                             onChannelSelected = { selectedChannel ->
                                 navigateToTvPlayer(selectedChannel)
                             },

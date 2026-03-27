@@ -19,3 +19,26 @@
 //        movieRepositoryImpl: MovieRepositoryImpl
 //    ): MovieRepository
 //}
+
+package com.bacbpl.iptv.di
+
+import com.bacbpl.iptv.jetStram.data.network.ApiService
+import com.bacbpl.iptv.jetStram.data.repositories.ChannelRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object RepositoryModule {
+
+    @Provides
+    @Singleton
+    fun provideChannelRepository(
+        apiService: ApiService
+    ): ChannelRepository {
+        return ChannelRepository(apiService)
+    }
+}

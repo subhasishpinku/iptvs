@@ -86,7 +86,7 @@ fun MovieDetails(
                         .Composable
                         .ContentDescription
                         .moviePoster(movieDetails.name),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxSize(),
                     onError = {
                         imageLoadingError = true

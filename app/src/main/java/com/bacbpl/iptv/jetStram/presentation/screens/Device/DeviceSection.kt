@@ -65,10 +65,10 @@ fun DeviceSection(
             )
             .padding(24.dp)
     ) {
-        // Header Section with Icon
+        // Header Section
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 24.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Devices,
@@ -137,9 +137,9 @@ fun DeviceSection(
                 }
             }
         } else {
-            // Grid with enhanced animations
+            // Grid with responsive columns
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Adaptive(minSize = 280.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize()
@@ -160,7 +160,7 @@ fun AnimatedDeviceCard(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
+        targetValue = if (isFocused) 1.02f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
@@ -168,28 +168,31 @@ fun AnimatedDeviceCard(
         label = "card_scale_animation"
     )
 
-    // Get base colors for the card
-    val baseContainerColor = when {
-        item.label.contains("ID", ignoreCase = true) -> MaterialTheme.colorScheme.secondaryContainer
-        item.label.contains("MAC", ignoreCase = true) -> MaterialTheme.colorScheme.tertiaryContainer
-        item.label.contains("Version", ignoreCase = true) -> MaterialTheme.colorScheme.primaryContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant
+    // Get colors based on category
+    val baseContainerColor = when (item.category) {
+        DeviceInfoCategory.IDENTIFIER -> MaterialTheme.colorScheme.secondaryContainer
+        DeviceInfoCategory.NETWORK -> MaterialTheme.colorScheme.tertiaryContainer
+        DeviceInfoCategory.HARDWARE -> MaterialTheme.colorScheme.primaryContainer
+        DeviceInfoCategory.SOFTWARE -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)
+        DeviceInfoCategory.SYSTEM -> MaterialTheme.colorScheme.surfaceVariant
     }
 
-    val baseContentColor = when {
-        item.label.contains("ID", ignoreCase = true) -> MaterialTheme.colorScheme.onSecondaryContainer
-        item.label.contains("MAC", ignoreCase = true) -> MaterialTheme.colorScheme.onTertiaryContainer
-        item.label.contains("Version", ignoreCase = true) -> MaterialTheme.colorScheme.onPrimaryContainer
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    val baseContentColor = when (item.category) {
+        DeviceInfoCategory.IDENTIFIER -> MaterialTheme.colorScheme.onSecondaryContainer
+        DeviceInfoCategory.NETWORK -> MaterialTheme.colorScheme.onTertiaryContainer
+        DeviceInfoCategory.HARDWARE -> MaterialTheme.colorScheme.onPrimaryContainer
+        DeviceInfoCategory.SOFTWARE -> MaterialTheme.colorScheme.onSecondaryContainer
+        DeviceInfoCategory.SYSTEM -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    // Focused colors - brighter and more vibrant
+    // Focused colors
     val containerColor = if (isFocused) {
-        when {
-            item.label.contains("ID", ignoreCase = true) -> MaterialTheme.colorScheme.secondary
-            item.label.contains("MAC", ignoreCase = true) -> MaterialTheme.colorScheme.tertiary
-            item.label.contains("Version", ignoreCase = true) -> MaterialTheme.colorScheme.primary
-            else -> MaterialTheme.colorScheme.primaryContainer
+        when (item.category) {
+            DeviceInfoCategory.IDENTIFIER -> MaterialTheme.colorScheme.secondary
+            DeviceInfoCategory.NETWORK -> MaterialTheme.colorScheme.tertiary
+            DeviceInfoCategory.HARDWARE -> MaterialTheme.colorScheme.primary
+            DeviceInfoCategory.SOFTWARE -> MaterialTheme.colorScheme.secondary
+            DeviceInfoCategory.SYSTEM -> MaterialTheme.colorScheme.primaryContainer
         }
     } else {
         baseContainerColor
@@ -208,91 +211,62 @@ fun AnimatedDeviceCard(
         ),
         shape = CardDefaults.shape(shape = RoundedCornerShape(16.dp))
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
+            // Header with icon and label
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Label with icon
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                Icon(
+                    imageVector = item.category.icon,
+                    contentDescription = null,
+                    tint = if (isFocused) Color.White else baseContentColor,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = item.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isFocused) Color.White else baseContentColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Value section
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = item.value,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isFocused) Color.White else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (item.value != "Not Available") {
                     Icon(
-                        imageVector = getIconForLabel(item.label),
-                        contentDescription = null,
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy",
                         tint = if (isFocused) {
-                            Color.White
+                            Color.White.copy(alpha = 0.8f)
                         } else {
-                            baseContentColor
+                            baseContentColor.copy(alpha = 0.5f)
                         },
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(16.dp)
                     )
-                    Text(
-                        text = item.label,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = if (isFocused) {
-                            Color.White
-                        } else {
-                            baseContentColor
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Value with copy indicator
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = item.value,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isFocused) {
-                            Color.White
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    if (item.value != "Not Available") {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy",
-                            tint = if (isFocused) {
-                                Color.White.copy(alpha = 0.8f)
-                            } else {
-                                baseContentColor.copy(alpha = 0.5f)
-                            },
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun getIconForLabel(label: String): ImageVector {
-    return when {
-        label.contains("ID") -> Icons.Default.Info
-        label.contains("MAC") -> Icons.Default.Wifi
-        label.contains("Model") -> Icons.Default.Devices
-        label.contains("Manufacturer") -> Icons.Default.Business
-        label.contains("Version") -> Icons.Default.Android
-        label.contains("API") -> Icons.Default.Code
-        label.contains("Name") -> Icons.Default.DriveFileRenameOutline
-        else -> Icons.Default.DeviceHub
     }
 }
 
@@ -302,7 +276,10 @@ data class DeviceInfoItem(
     val category: DeviceInfoCategory = DeviceInfoCategory.getCategory(label)
 )
 
-enum class DeviceInfoCategory(val icon: ImageVector, val color: Color) {
+enum class DeviceInfoCategory(
+    val icon: ImageVector,
+    val color: Color
+) {
     IDENTIFIER(Icons.Default.Info, Color(0xFF2196F3)),
     NETWORK(Icons.Default.Wifi, Color(0xFF4CAF50)),
     HARDWARE(Icons.Default.Devices, Color(0xFFFF9800)),

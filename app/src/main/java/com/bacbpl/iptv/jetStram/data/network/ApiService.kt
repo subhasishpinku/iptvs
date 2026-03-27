@@ -1,5 +1,6 @@
 package com.bacbpl.iptv.jetStram.data.network
 
+import com.bacbpl.iptv.jetStram.data.entities.TvChannel
 import com.bacbpl.iptv.jetStram.data.models.ApiMoviesResponse
 import com.bacbpl.iptv.jetStram.data.models.MovieCategoriesResponseItem
 import com.bacbpl.iptv.jetStram.data.models.OttWidgetResponse
@@ -32,4 +33,8 @@ interface ApiService {
         @Field("service_number") serviceNumber: String,
         @Field("state_code") stateCode: String
     ): UpdateProfileResponse
+
+
+    @GET("api/getChannels")
+    suspend fun getTvChannels(): List<TvChannel>
 }

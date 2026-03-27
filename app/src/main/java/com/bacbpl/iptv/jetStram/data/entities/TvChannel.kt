@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TvChannel(
-    val id: String,
+    val id: Int,
     val name: String,
     val logoUrl: String,
     val streamUrl: String,

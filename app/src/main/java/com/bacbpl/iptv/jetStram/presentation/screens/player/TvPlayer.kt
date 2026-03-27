@@ -1355,7 +1355,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -1371,7 +1370,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.delay
-
 class TvPlayer : ComponentActivity() {
     companion object {
         const val EXTRA_CHANNEL_ID = "id"
@@ -1385,9 +1383,14 @@ class TvPlayer : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val channelId = intent.getIntExtra(EXTRA_CHANNEL_ID, -1)
+        if (channelId == -1) {
+            finish()
+            return
+        }
         val channel = TvChannel(
-            id = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: "",
+//            id = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: "",
+          id = channelId,  // Int
             name = intent.getStringExtra(EXTRA_CHANNEL_NAME) ?: "",
             logoUrl = intent.getStringExtra(EXTRA_CHANNEL_LOGO_URL) ?: "",
             streamUrl = intent.getStringExtra(EXTRA_CHANNEL_STREAM_URL) ?: "",
@@ -2401,10 +2404,10 @@ fun TopActionBar(
     Surface(
         modifier = modifier
             .wrapContentWidth() // This will make the width fit the content
-            .padding(horizontal = 4.dp) // 👈 add this
+            .padding(horizontal = 4.dp) //  add this
             .shadow(elevation = 0.dp, shape = RoundedCornerShape(20.dp)),
         color = Color.Black.copy(alpha = 0.8f),
-        shape = RoundedCornerShape(20.dp) // 👈 MUST match
+        shape = RoundedCornerShape(20.dp) // MUST match
     ) {
         LazyRow(
             state = listState,
@@ -2925,157 +2928,153 @@ fun ChannelInfoOverlay(
     }
 }
 @Composable
-    fun SwipeChannelOverlay(
+fun SwipeChannelOverlay(
     nextChannel: TvChannel?,
     previousChannel: TvChannel?,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp)),
-            color = Color.Black.copy(alpha = 0.85f),
-            shape = RoundedCornerShape(32.dp)
+    var showOverlay by remember { mutableStateOf(true) }
+
+    // Auto-hide the overlay after 3 seconds
+    LaunchedEffect(nextChannel, previousChannel) {
+        showOverlay = true
+        delay(3000)
+        showOverlay = false
+    }
+
+    // Only show overlay when showOverlay is true
+    if (showOverlay) {
+        Box(
+            modifier = modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
         ) {
-            Row(
+            Surface(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(32.dp)),
+                color = Color.Black.copy(alpha = 0.85f),
+                shape = RoundedCornerShape(32.dp)
             ) {
-                // Previous Channel Section
-                if (previousChannel != null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.wrapContentWidth()
-                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.KeyboardArrowLeft,
-//                            contentDescription = "Previous",
-//                            tint = Color.White,
-//                            modifier = Modifier.size(24.dp)
-//                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color.DarkGray)
+                Row(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Previous Channel Section
+                    if (previousChannel != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = Modifier.wrapContentWidth()
                         ) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(previousChannel.logoUrl)
-                                    .crossfade(true)
-                                    .error(R.drawable.logos)
-                                    .build(),
-                                contentDescription = previousChannel.name,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color.DarkGray)
+                            ) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(previousChannel.logoUrl)
+                                        .crossfade(true)
+                                        .error(R.drawable.logos)
+                                        .build(),
+                                    contentDescription = previousChannel.name,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = previousChannel.name.take(12) + if (previousChannel.name.length > 12) "..." else "",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
                             )
                         }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
+
+                    // Center Section with Icons
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowCircleLeft,
+                            contentDescription = "Swipe Left",
+                            tint = Color.White.copy(alpha = 0.9f),
+                            modifier = Modifier.size(20.dp)
+                        )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
                         Text(
-                            text = previousChannel.name.take(12) + if (previousChannel.name.length > 12) "..." else "",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
+                            text = "SWIPE TO CHANGE",
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Icon(
+                            imageVector = Icons.Default.ArrowCircleRight,
+                            contentDescription = "Swipe Right",
+                            tint = Color.White.copy(alpha = 0.9f),
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp)) // Add spacing between sections
-                }
+                    // Next Channel Section
+                    if (nextChannel != null) {
+                        Spacer(modifier = Modifier.width(16.dp))
 
-                // Center Text
-                // Center Section with Icons
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowCircleLeft,
-                        contentDescription = "Swipe Left",
-                        tint = Color.White.copy(alpha = 0.9f),
-                        modifier = Modifier.size(20.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = "SWIPE TO CHANGE",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Icon(
-                        imageVector = Icons.Default.ArrowCircleRight,
-                        contentDescription = "Swipe Right",
-                        tint = Color.White.copy(alpha = 0.9f),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-
-                // Next Channel Section
-                if (nextChannel != null) {
-                    Spacer(modifier = Modifier.width(16.dp)) // Add spacing between sections
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.wrapContentWidth()
-                    ) {
-                        Text(
-                            text = nextChannel.name.take(12) + if (nextChannel.name.length > 12) "..." else "",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(Color.DarkGray)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.wrapContentWidth()
                         ) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(nextChannel.logoUrl)
-                                    .crossfade(true)
-                                    .error(R.drawable.logos)
-                                    .build(),
-                                contentDescription = nextChannel.name,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Fit
+                            Text(
+                                text = nextChannel.name.take(12) + if (nextChannel.name.length > 12) "..." else "",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
                             )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color.DarkGray)
+                            ) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(nextChannel.logoUrl)
+                                        .crossfade(true)
+                                        .error(R.drawable.logos)
+                                        .build(),
+                                    contentDescription = nextChannel.name,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
                         }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-//                        Icon(
-//                            imageVector = Icons.Default.KeyboardArrowRight,
-//                            contentDescription = "Next",
-//                            tint = Color.White,
-//                            modifier = Modifier.size(24.dp)
-//                        )
                     }
                 }
             }

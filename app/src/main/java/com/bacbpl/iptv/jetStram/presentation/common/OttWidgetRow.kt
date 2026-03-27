@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +31,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -48,6 +52,7 @@ import com.bacbpl.iptv.jetStram.data.entities.OttWidget
 import com.bacbpl.iptv.jetStram.data.entities.OttWidgetItem
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 
+
 @Composable
 fun OttWidgetRow(
     widget: OttWidget,
@@ -56,41 +61,49 @@ fun OttWidgetRow(
 ) {
     val childPadding = rememberChildPadding()
 
+    val listState = rememberLazyListState()
+    val firstItemFocusRequester = remember { FocusRequester() }
+
     Column(modifier = modifier) {
+
         Text(
             text = widget.name,
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            ),
-            color = Color.White,
+            style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(
                 start = childPadding.start,
-                bottom = 12.dp,
-                top = 16.dp
+                top = 16.dp,
+                bottom = 12.dp
             )
         )
 
         LazyRow(
+            state = listState,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(
                 start = childPadding.start,
                 end = childPadding.end
             )
         ) {
-            items(
-                items = widget.items,
-                key = { it.id }
-            ) { item ->
+            itemsIndexed(widget.items) { index, item ->
+
                 OttWidgetItemCard(
                     item = item,
-                    onClick = { onItemClick(item) }
+                    onClick = { onItemClick(item) },
+                    modifier = if (index == 0) {
+                        Modifier.focusRequester(firstItemFocusRequester)
+                    } else Modifier
                 )
             }
         }
     }
-}
 
+//    // ✅ KEY FIX: wait until items are visible
+//    LaunchedEffect(listState.layoutInfo.visibleItemsInfo) {
+//        if (listState.layoutInfo.visibleItemsInfo.isNotEmpty()) {
+//            firstItemFocusRequester.requestFocus()
+//        }
+//    }
+}
 @Composable
 fun OttWidgetItemCard(
     item: OttWidgetItem,

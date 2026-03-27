@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package  com.bacbpl.iptv.jetStram.presentation.screens.movies
+package com.bacbpl.iptv.jetStram.presentation.screens.movies
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,7 +48,14 @@ fun MoviesScreen(
 ) {
     val uiState by moviesScreenViewModel.uiState.collectAsStateWithLifecycle()
     when (val s = uiState) {
-        is MoviesScreenUiState.Loading -> Loading()
+        is MoviesScreenUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Loading()
+            }
+        }
         is MoviesScreenUiState.Ready -> {
             Catalog(
                 movieList = s.movieList,
