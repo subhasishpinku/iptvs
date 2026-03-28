@@ -167,12 +167,12 @@ fun AccountsSection(
                     .background(Color.Black)  // Black background for main column
                     .padding(paddingValues)
             ) {
-                // Quick Stats Row
+                // Quick Stats Row - Reduced height
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = childPadding.start, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(horizontal = childPadding.start, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     QuickStatCard(
                         title = "Partner Ref ID",
@@ -194,7 +194,7 @@ fun AccountsSection(
                     )
                 }
 
-                // Main Account Section
+                // Main Account Section - Adjusted grid columns
                 val accountsSectionListItems = remember(userName, userEmail, userMobile, subscriberInfo) {
                     listOf(
                         // Basic Info
@@ -344,7 +344,7 @@ fun QuickStatCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.height(80.dp),
+        modifier = modifier.height(70.dp), // Reduced from 80dp to 70dp
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFF1A1A1A)  // Dark gray, not pure black for contrast
         )
@@ -352,7 +352,7 @@ fun QuickStatCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(6.dp), // Reduced padding from 8dp to 6dp
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -360,19 +360,19 @@ fun QuickStatCard(
                 imageVector = icon,
                 contentDescription = title,
                 tint = Color(0xFFE50914),
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp) // Reduced from 20dp to 18dp
             )
             Text(
                 text = value,
                 color = Color.White,
-                fontSize = 12.sp,
+                fontSize = 11.sp, // Reduced from 12sp to 11sp
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
             Text(
                 text = title,
                 color = Color.White.copy(alpha = 0.5f),
-                fontSize = 10.sp,
+                fontSize = 9.sp, // Reduced from 10sp to 9sp
                 maxLines = 1
             )
         }
@@ -415,39 +415,41 @@ fun SubscriberInfoDialog(
                     .heightIn(max = 400.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Use Alt LCO Code
+                // Use Alt LCO Code - Made more compact
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 6.dp), // Reduced from 8dp to 6dp
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Use Alt LCO Code:",
                         color = Color.White,
+                        fontSize = 13.sp, // Added explicit font size
                         modifier = Modifier.weight(1f)
                     )
                     Row {
                         listOf("No (0)", "Yes (1)").forEachIndexed { index, option ->
                             Box(
                                 modifier = Modifier
-                                    .padding(horizontal = 4.dp)
+                                    .padding(horizontal = 3.dp) // Reduced from 4dp to 3dp
                                     .background(
                                         color = if ((index == 0 && useAltLcoCode == "0") ||
                                             (index == 1 && useAltLcoCode == "1"))
                                             Color(0xFFE50914)
                                         else
                                             Color(0xFF333333),
-                                        shape = RoundedCornerShape(4.dp)
+                                        shape = RoundedCornerShape(3.dp) // Reduced from 4dp to 3dp
                                     )
                                     .clickable(enabled = !isUpdating) {
                                         useAltLcoCode = if (index == 0) "0" else "1"
                                     }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    .padding(horizontal = 10.dp, vertical = 5.dp) // Reduced padding
                             ) {
                                 Text(
                                     text = option,
-                                    color = Color.White
+                                    color = Color.White,
+                                    fontSize = 12.sp // Added explicit font size
                                 )
                             }
                         }
@@ -542,7 +544,7 @@ fun SubscriberInfoDialog(
             ) {
                 if (isUpdating) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(18.dp), // Reduced from 20dp to 18dp
                         color = Color(0xFFE50914)
                     )
                 } else {
@@ -578,27 +580,27 @@ fun SubscriberInfoField(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 3.dp) // Reduced from 4dp to 3dp
     ) {
         Text(
             text = label,
             color = Color.White.copy(alpha = 0.7f),
-            fontSize = 12.sp,
-            modifier = Modifier.padding(bottom = 4.dp)
+            fontSize = 11.sp, // Reduced from 12sp to 11sp
+            modifier = Modifier.padding(bottom = 3.dp) // Reduced from 4dp to 3dp
         )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (isMultiline) 80.dp else 48.dp)
+                .height(if (isMultiline) 65.dp else 42.dp) // Reduced from 80dp/48dp to 65dp/42dp
                 .background(
                     color = if (isFocused) Color(0xFF333333) else Color(0xFF2A2A2A),
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(3.dp) // Reduced from 4dp to 3dp
                 )
                 .border(
                     width = 1.dp,
                     color = if (isFocused) Color(0xFFE50914) else Color.Transparent,
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(3.dp)
                 )
                 .onFocusChanged { isFocused = it.isFocused }
                 .focusable(enabled = enabled)
@@ -608,10 +610,10 @@ fun SubscriberInfoField(
                 onValueChange = onValueChange,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 10.dp, vertical = 6.dp), // Reduced padding
                 textStyle = LocalTextStyle.current.copy(
                     color = Color.White,
-                    fontSize = 14.sp
+                    fontSize = 13.sp // Reduced from 14sp to 13sp
                 ),
                 keyboardOptions = if (isNumber) {
                     KeyboardOptions(keyboardType = KeyboardType.Number)

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">bacbpliptv</string>
     <string name="back">Back</string>
+    <string name="log_out">Log Out</string>
     <string name="generic_error_msg">Couldn\'t get %1s. Reason: %2s</string>
     <string name="brand_logo_text">BACBPL IP TV</string>
     <string name="watch_now">Watch Now</string>

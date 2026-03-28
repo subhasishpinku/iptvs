@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package  com.bacbpl.iptv.jetStram.presentation.screens.profile
+package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
+import android.content.Context
+import android.content.Intent
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -51,6 +53,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,17 +71,26 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.bacbpl.iptv.R
 import com.bacbpl.iptv.jetStram.presentation.screens.Device.DeviceSection
-import  com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
+import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import com.bacbpl.iptv.ui.activities.StartScreen
+import com.bacbpl.iptv.utils.UserSession
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalTvMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     @FloatRange(from = 0.0, to = 1.0)
-    sidebarWidthFraction: Float = 0.17f
+    sidebarWidthFraction: Float = 0.17f,
+    onLogOut: () -> Unit = {}
 ) {
     val childPadding = rememberChildPadding()
     val profileNavController = rememberNavController()
+    val context = LocalContext.current
 
     val backStack by profileNavController.currentBackStackEntryAsState()
     val currentDestination =
@@ -88,6 +100,20 @@ fun ProfileScreen(
     var isLeftColumnFocused by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    // Logout handler
+    val handleLogout = {
+        // Clear user session
+        UserSession.clearSession(context)
+
+        // Navigate to StartScreen
+        val intent = Intent(context, StartScreen::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        context.startActivity(intent)
+
+        // Call the original onLogOut callback if needed
+        onLogOut()
+    }
 
     Row(
         modifier = Modifier
@@ -106,8 +132,8 @@ fun ProfileScreen(
                 .focusGroup(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Regular profile screens
             ProfileScreens.entries.forEachIndexed { index, profileScreen ->
-                // TODO: make this dense list item
                 key(index) {
                     ListItem(
                         trailingContent = {
@@ -160,6 +186,53 @@ fun ProfileScreen(
                         shape = ListItemDefaults.shape(shape = MaterialTheme.shapes.extraSmall)
                     )
                 }
+            }
+
+            // Spacer to push Log Out to bottom
+            Box(modifier = Modifier.weight(1f))
+
+            // Log Out item
+            key("logout") {
+                ListItem(
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.Logout,
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                                .padding(start = 4.dp)
+                                .size(20.dp),
+                            contentDescription = stringResource(id = R.string.log_out)
+                        )
+                    },
+                    headlineContent = {
+                        Text(
+                            text = stringResource(id = R.string.log_out),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    selected = false,
+                    onClick = { handleLogout() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.extraSmall)
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                // Optional: Clear selection when focusing on Log Out
+                                isLeftColumnFocused = true
+                            }
+                        },
+                    scale = ListItemDefaults.scale(focusedScale = 1f),
+                    colors = ListItemDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.errorContainer,
+                        focusedContentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    shape = ListItemDefaults.shape(shape = MaterialTheme.shapes.extraSmall)
+                )
             }
         }
 
@@ -234,7 +307,7 @@ fun ProfileScreen(
 fun ProfileScreenPreview() {
     JetStreamTheme {
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-            ProfileScreen()
+            ProfileScreen(onLogOut = {})
         }
     }
 }

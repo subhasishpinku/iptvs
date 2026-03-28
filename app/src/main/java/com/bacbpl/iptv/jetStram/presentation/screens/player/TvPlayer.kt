@@ -1957,15 +1957,15 @@ fun TvPlayerScreen(
         )
 
         // Channel Preview Overlay
-        if (showChannelPreview) {
-            ChannelPreviewOverlay(
-                currentChannel = currentChannel,
-                nextChannel = nextChannel,
-                previousChannel = previousChannel,
-                direction = previewDirection,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
+//        if (showChannelPreview) {
+//            ChannelPreviewOverlay(
+//                currentChannel = currentChannel,
+//                nextChannel = nextChannel,
+//                previousChannel = previousChannel,
+//                direction = previewDirection,
+//                modifier = Modifier.align(Alignment.BottomCenter)
+//            )
+//        }
 
         // Show swipe overlay only when menu/grid is not visible
         if (selectedCategory == null && !showGrid && !showChannelPreview && !showMenuBar) {
