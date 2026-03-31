@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.bacbpl.iptv.R
+import com.bacbpl.iptv.data.api.RetrofitClient
 import com.bacbpl.iptv.utils.ToastUtils
 import com.bacbpl.iptv.ui.activities.otpscreen.viewmodel.OtpUiState
 import com.bacbpl.iptv.ui.activities.otpscreen.viewmodel.OtpViewModel
@@ -35,6 +36,9 @@ import com.bacbpl.iptv.utils.UserSession
 @Composable
 fun OTPActivity(
     phoneNumber: String,
+    deviceId: String,
+    macId: String,
+    deviceName: String,
     onBack: () -> Unit,
     onSubmit: (String) -> Unit,
     onResend: () -> Unit
@@ -56,10 +60,10 @@ fun OTPActivity(
 
     // Auto-send OTP when screen loads
     LaunchedEffect(Unit) {
-        viewModel.sendOtp(phoneNumber)
+        viewModel.sendOtp(phoneNumber, deviceId, macId, deviceName)
     }
 
-    // Handle send OTP state with ToastUtils
+    // Handle send OTP state
     LaunchedEffect(sendOtpState) {
         when (sendOtpState) {
             is OtpUiState.Success -> {
@@ -73,32 +77,35 @@ fun OTPActivity(
         }
     }
 
-    // Handle verify OTP state with ToastUtils
+    // Handle verify OTP state
     LaunchedEffect(verifyOtpState) {
         when (verifyOtpState) {
             is VerifyOtpUiState.Success -> {
                 isSubmitting = false
                 val response = (verifyOtpState as VerifyOtpUiState.Success).response
-                ToastUtils.showSafeToast(context, response.message)
+                ToastUtils.showSafeToast(context, response!!.message)
 
                 if (response.status) {
-                    // Update UserSession after successful login
+                    // Save token to RetrofitClient
+                    response.token?.let { token ->
+                        RetrofitClient.setAuthToken(token)
+                        println("=== Token set in RetrofitClient after OTP verification ===")
+                        println("Token: ${token.take(20)}...")
+                    }
+
+                    // Update UserSession
                     UserSession.updateSession(context)
 
                     ToastUtils.showSafeToast(
                         context,
                         "Login Successful! Welcome ${response.user?.name ?: "User"}"
                     )
-
-                    // Navigate to main screen
                     onSubmit(otpValues.joinToString(""))
                 }
             }
             is VerifyOtpUiState.Error -> {
                 isSubmitting = false
                 ToastUtils.showSafeToast(context, (verifyOtpState as VerifyOtpUiState.Error).message)
-
-                // Clear OTP fields on error
                 otpValues.forEachIndexed { index, _ ->
                     otpValues[index] = ""
                 }
@@ -114,7 +121,6 @@ fun OTPActivity(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Image
         AsyncImage(
             model = R.drawable.bg_movies,
             contentDescription = null,
@@ -122,14 +128,12 @@ fun OTPActivity(
             modifier = Modifier.matchParentSize()
         )
 
-        // Dark Overlay
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .background(Color.Black.copy(alpha = 0.7f))
         )
 
-        // Main Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -150,7 +154,6 @@ fun OTPActivity(
                         .fillMaxWidth()
                         .padding(32.dp)
                 ) {
-                    // Back Button
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier.size(56.dp)
@@ -164,7 +167,6 @@ fun OTPActivity(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Title
                     Text(
                         text = "OTP Verification",
                         fontSize = 36.sp,
@@ -174,7 +176,6 @@ fun OTPActivity(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Subtitle
                     Text(
                         text = "Enter the 4-digit OTP sent to",
                         fontSize = 18.sp,
@@ -189,7 +190,6 @@ fun OTPActivity(
 
                     Spacer(modifier = Modifier.height(40.dp))
 
-                    // Loading indicator for sending OTP
                     if (sendOtpState is OtpUiState.Loading) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -198,7 +198,6 @@ fun OTPActivity(
                             color = Color(0xFFE50914)
                         )
                     } else {
-                        // OTP Input Fields - 4 boxes
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
@@ -212,10 +211,9 @@ fun OTPActivity(
                                             if (newValue.isNotEmpty() && i < otpLength - 1) {
                                                 focusRequesters[i + 1].requestFocus()
                                             } else if (newValue.isNotEmpty() && i == otpLength - 1) {
-                                                // Auto-submit when last digit is entered
                                                 val otp = (otpValues.toList().subList(0, otpLength - 1) + newValue).joinToString("")
                                                 if (otp.length == otpLength) {
-                                                    viewModel.verifyOtp(phoneNumber, otp)
+                                                    viewModel.verifyOtp(phoneNumber, otp, deviceId, macId, deviceName)
                                                 }
                                             }
                                         }
@@ -231,18 +229,16 @@ fun OTPActivity(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // Timer
-                        if (timerState.isRunning) {
-                            Text(
-                                text = String.format("00:%02d", timerState.seconds),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
-                        }
+//                        if (timerState.isRunning) {
+//                            Text(
+//                                text = String.format("00:%02d", timerState.seconds),
+//                                fontSize = 22.sp,
+//                                fontWeight = FontWeight.Bold,
+//                                color = Color.White,
+//                                modifier = Modifier.align(Alignment.CenterHorizontally)
+//                            )
+//                        }
 
-                        // Progress Bar for verification
                         if (isSubmitting) {
                             CircularProgressIndicator(
                                 modifier = Modifier
@@ -252,12 +248,10 @@ fun OTPActivity(
                             )
                         }
 
-                        // Resend Button
                         if (!timerState.isRunning) {
                             TextButton(
                                 onClick = {
-                                    viewModel.sendOtp(phoneNumber)
-                                    viewModel.resetTimer()
+                                    viewModel.sendOtp(phoneNumber, deviceId, macId, deviceName)
                                     otpValues.forEachIndexed { index, _ ->
                                         otpValues[index] = ""
                                     }
@@ -278,12 +272,11 @@ fun OTPActivity(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Submit Button
                         Button(
                             onClick = {
                                 val otp = otpValues.joinToString("")
                                 if (otp.length == otpLength) {
-                                    viewModel.verifyOtp(phoneNumber, otp)
+                                    viewModel.verifyOtp(phoneNumber, otp, deviceId, macId, deviceName)
                                 }
                             },
                             enabled = otpValues.all { it.isNotEmpty() } &&
@@ -315,29 +308,25 @@ fun OTPActivity(
 fun OtpTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    modifier: Modifier,
+    enabled: Boolean
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
+        enabled = enabled,
+        singleLine = true,
         textStyle = LocalTextStyle.current.copy(
-            fontSize = 36.sp,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            color = Color.White
         ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.White,
             unfocusedBorderColor = Color.Gray,
-            cursorColor = Color.White,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            disabledTextColor = Color.Gray,
-            disabledBorderColor = Color.DarkGray
-        ),
-        singleLine = true,
-        maxLines = 1,
-        enabled = enabled
+            cursorColor = Color.White
+        )
     )
 }

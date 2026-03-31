@@ -1,5 +1,6 @@
 package com.bacbpl.iptv.jetStram.data.repositories
 
+import com.bacbpl.iptv.jetStram.data.models.SubscriberDetailsResponse
 import com.bacbpl.iptv.jetStram.data.models.UpdateProfileResponse
 import com.bacbpl.iptv.jetStram.data.network.ApiService
 import com.bacbpl.iptv.ui.activities.signupscreen.data.repository.Resource
@@ -8,11 +9,31 @@ import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ProfileRepository @Inject constructor(
     private val apiService: ApiService
 ) {
-    suspend fun updateProfile(
+
+    suspend fun getSubscriberDetails(mobile: String): Resource<SubscriberDetailsResponse> {
+        return try {
+            val response = apiService.getSubscriberDetails(mobile)
+            if (response.subscriber != null || response.ottplayDetails != null) {
+                Resource.Success(response)
+            } else {
+                Resource.Error("No subscriber data found")
+            }
+        } catch (e: HttpException) {
+            Resource.Error("Network error: ${e.message()}")
+        } catch (e: IOException) {
+            Resource.Error("Check your internet connection")
+        } catch (e: Exception) {
+            Resource.Error("An error occurred: ${e.message}")
+        }
+    }
+
+    fun updateProfile(
         mobile: String,
         firstName: String,
         lastName: String,
@@ -39,7 +60,7 @@ class ProfileRepository @Inject constructor(
             if (response.success) {
                 emit(Resource.Success(response))
             } else {
-                emit(Resource.Error(response.message))
+                emit(Resource.Error(response.message ?: "Update failed"))
             }
         } catch (e: HttpException) {
             emit(Resource.Error("Network error: ${e.message()}"))

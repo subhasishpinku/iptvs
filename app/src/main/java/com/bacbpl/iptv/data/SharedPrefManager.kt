@@ -2,6 +2,7 @@ package com.bacbpl.iptv.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.bacbpl.iptv.data.api.RetrofitClient
 import com.bacbpl.iptv.ui.activities.otpscreen.data.VerifyOtpResponse
 import com.bacbpl.iptv.ui.activities.signupscreen.data.SignupResponse
 import com.google.gson.Gson
@@ -23,6 +24,7 @@ class SharedPrefManager(context: Context) {
 
     fun saveUserLogin(loginResponse: VerifyOtpResponse) {
         try {
+            println("=== Saving User Login ===")
             // Save as login response
             val json = gson.toJson(loginResponse)
             prefs.edit().putString(KEY_USER_LOGIN, json).apply()
@@ -31,20 +33,25 @@ class SharedPrefManager(context: Context) {
             prefs.edit().remove(KEY_USER_SIGNUP).apply()
 
             // Save token and user details
-            loginResponse.token?.let {
-                prefs.edit().putString(KEY_TOKEN, it).apply()
+            loginResponse.token?.let { token ->
+                prefs.edit().putString(KEY_TOKEN, token).apply()
+                // Set token in RetrofitClient
+                RetrofitClient.setAuthToken(token)
+                println("Token saved: ${token.take(20)}...")
             }
+
             loginResponse.user?.let { user ->
                 prefs.edit().putInt(KEY_USER_ID, user.id).apply()
                 prefs.edit().putString(KEY_USER_NAME, user.name).apply()
                 prefs.edit().putString(KEY_USER_EMAIL, user.email).apply()
                 prefs.edit().putString(KEY_USER_MOBILE, user.mobile).apply()
+                println("User saved: ${user.name}, ID: ${user.id}")
             }
             prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
 
-            // Force apply all changes
-            prefs.edit().apply()
+            println("=== User Login Saved Successfully ===")
         } catch (e: Exception) {
+            println("Error saving user login: ${e.message}")
             e.printStackTrace()
         }
     }
@@ -64,18 +71,21 @@ class SharedPrefManager(context: Context) {
             prefs.edit().putString(KEY_USER_LOGIN, loginJson).apply()
 
             // Save token and user details
-            prefs.edit().putString(KEY_TOKEN, signupResponse.token).apply()
+            signupResponse.token?.let { token ->
+                prefs.edit().putString(KEY_TOKEN, token).apply()
+                // Set token in RetrofitClient
+                RetrofitClient.setAuthToken(token)
+                println("Token saved: ${token.take(20)}...")
+            }
+
             prefs.edit().putInt(KEY_USER_ID, signupResponse.user.id).apply()
             prefs.edit().putString(KEY_USER_NAME, signupResponse.user.name).apply()
             prefs.edit().putString(KEY_USER_EMAIL, signupResponse.user.email).apply()
             prefs.edit().putString(KEY_USER_MOBILE, signupResponse.user.mobile).apply()
             prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
 
-            // Force apply all changes
-            prefs.edit().apply()
-
             println("=== Data Saved Successfully ===")
-            println("Token: ${signupResponse.token}")
+            println("Token: ${signupResponse.token?.take(20)}...")
             println("User ID: ${signupResponse.user.id}")
             println("User Name: ${signupResponse.user.name}")
             println("User Email: ${signupResponse.user.email}")
@@ -113,7 +123,10 @@ class SharedPrefManager(context: Context) {
     }
 
     fun getToken(): String? {
-        return prefs.getString(KEY_TOKEN, null)
+        val token = prefs.getString(KEY_TOKEN, null)
+        println("=== Getting Token from SharedPref ===")
+        println("Token present: ${token != null}")
+        return token
     }
 
     fun getUserId(): Int {
@@ -137,6 +150,10 @@ class SharedPrefManager(context: Context) {
     }
 
     fun clearUserSession() {
+        println("=== Clearing User Session ===")
         prefs.edit().clear().apply()
+        // Clear token from RetrofitClient
+        RetrofitClient.setAuthToken(null)
+        println("Session cleared")
     }
 }

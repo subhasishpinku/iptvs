@@ -1,22 +1,7 @@
-/*
- * Copyright 2023 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,9 +34,9 @@ import com.bacbpl.iptv.ui.activities.StartScreen
 import com.bacbpl.iptv.utils.UserSession
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 import com.bacbpl.iptv.jetStram.presentation.viewmodel.ProfileViewModel
+import com.bacbpl.iptv.jetStram.presentation.viewmodel.LogoutViewModel
 import com.bacbpl.iptv.ui.activities.signupscreen.data.repository.Resource
 
-// Icon constants
 val QrCode = Icons.Default.QrCodeScanner
 val ConfirmationNumber = Icons.Default.ConfirmationNumber
 val LocationOn = Icons.Default.LocationOn
@@ -68,7 +53,6 @@ data class AccountsSectionData(
     val onClick: () -> Unit = {}
 )
 
-// Data class for subscriber information
 data class SubscriberInfo(
     val useAltLcoCode: String = "0",
     val phone: String = "",
@@ -85,47 +69,81 @@ data class SubscriberInfo(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsSection(
-    profileViewModel: ProfileViewModel = hiltViewModel()
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    logoutViewModel: LogoutViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val isLoggedIn by UserSession.isLoggedIn.collectAsState()
     val userName by UserSession.userName.collectAsState()
     val userEmail by UserSession.userEmail.collectAsState()
     val userMobile by UserSession.userMobile.collectAsState()
+    val deviceId by UserSession.deviceId.collectAsState()
 
     val childPadding = rememberChildPadding()
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showSubscriberInfo by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
-    // Collect update profile state
     val updateProfileState by profileViewModel.updateProfileState.collectAsState()
     val isUpdating by profileViewModel.isUpdating.collectAsState()
+    val subscriberDetailsState by profileViewModel.subscriberDetailsState.collectAsState()
+    var isLoadingSubscriberDetails by remember { mutableStateOf(false) }
 
-    // Show snackbar for update result
     val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(updateProfileState) {
-        when (updateProfileState) {
+
+    // Observe logout state
+    val logoutState by logoutViewModel.logoutState.collectAsState()
+    val isLoggingOut by logoutViewModel.isLoggingOut.collectAsState()
+
+    // Handle logout response
+    LaunchedEffect(logoutState) {
+        when (logoutState) {
             is Resource.Success -> {
+                val message = (logoutState as Resource.Success).data?.message ?: "Logged out successfully"
                 snackbarHostState.showSnackbar(
-                    (updateProfileState as Resource.Success).data.message,
+                    message,
                     duration = SnackbarDuration.Short
                 )
-                profileViewModel.resetUpdateState()
-                showSubscriberInfo = false
+                // Navigate to StartScreen
+                val intent = Intent(context, StartScreen::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+                logoutViewModel.resetLogoutState()
             }
             is Resource.Error -> {
+                val error = (logoutState as Resource.Error).message ?: "Logout failed"
                 snackbarHostState.showSnackbar(
-                    (updateProfileState as Resource.Error).message,
+                    error,
                     duration = SnackbarDuration.Short
                 )
-                profileViewModel.resetUpdateState()
+                // Even on error, we should clear local session
+                UserSession.clearSession(context)
+                val intent = Intent(context, StartScreen::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+                logoutViewModel.resetLogoutState()
             }
             else -> {}
         }
     }
 
-    // Subscriber info state
+    LaunchedEffect(updateProfileState) {
+        if (updateProfileState is Resource.Success) {
+            snackbarHostState.showSnackbar(
+                (updateProfileState as Resource.Success).data?.message ?: "Profile updated successfully",
+                duration = SnackbarDuration.Short
+            )
+            profileViewModel.resetUpdateState()
+            showSubscriberInfo = false
+        } else if (updateProfileState is Resource.Error) {
+            snackbarHostState.showSnackbar(
+                (updateProfileState as Resource.Error).message ?: "Failed to update profile",
+                duration = SnackbarDuration.Short
+            )
+            profileViewModel.resetUpdateState()
+        }
+    }
+
     var subscriberInfo by remember {
         mutableStateOf(
             SubscriberInfo(
@@ -137,167 +155,221 @@ fun AccountsSection(
         )
     }
 
-    // Update session when composable is first composed
+    LaunchedEffect(userMobile) {
+        if (isLoggedIn && userMobile != null) {
+            val mobileNumber = userMobile!!.replace("+91", "").replace(" ", "")
+            if (mobileNumber.isNotEmpty()) {
+                isLoadingSubscriberDetails = true
+                profileViewModel.getSubscriberDetails(mobileNumber, context)
+            }
+        }
+    }
+
+    LaunchedEffect(subscriberDetailsState) {
+        if (subscriberDetailsState is Resource.Success) {
+            isLoadingSubscriberDetails = false
+            val response = (subscriberDetailsState as Resource.Success).data
+            response?.let { details ->
+                val ottplayData = details.ottplayDetails?.data
+                val subscriber = details.subscriber
+
+                subscriberInfo = subscriberInfo.copy(
+                    useAltLcoCode = subscriber?.useAltLcoCode ?: "0",
+                    phone = subscriber?.mobile ?: ottplayData?.phone ?: subscriberInfo.phone,
+                    email = subscriber?.email ?: ottplayData?.email ?: subscriberInfo.email,
+                    firstName = subscriber?.firstname ?: ottplayData?.name?.split(" ")?.firstOrNull() ?: subscriberInfo.firstName,
+                    lastName = subscriber?.lastname ?: ottplayData?.name?.split(" ")?.drop(1)?.joinToString(" ") ?: subscriberInfo.lastName,
+                    address = subscriber?.address ?: subscriberInfo.address,
+                    zone = subscriber?.zone ?: ottplayData?.zone ?: subscriberInfo.zone,
+                    serviceNumber = subscriber?.serviceNumber ?: ottplayData?.serviceNo ?: subscriberInfo.serviceNumber,
+                    stateCode = subscriber?.stateCode ?: subscriberInfo.stateCode,
+                    partnerReferenceId = ottplayData?.subCode ?: subscriberInfo.partnerReferenceId
+                )
+            }
+        } else if (subscriberDetailsState is Resource.Error) {
+            isLoadingSubscriberDetails = false
+        }
+    }
+
     LaunchedEffect(Unit) {
         UserSession.updateSession(context)
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.Black  // Set scaffold background to black
+        containerColor = Color.Black
     ) { paddingValues ->
         if (!isLoggedIn) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color.Black),  // Black background
+                    .background(Color.Black),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Please login to view profile",
-                    color = Color.White,  // White text on black background
+                    color = Color.White,
                     fontSize = 18.sp
                 )
             }
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)  // Black background for main column
-                    .padding(paddingValues)
-            ) {
-                // Quick Stats Row - Reduced height
-                Row(
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = childPadding.start, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        .fillMaxSize()
+                        .background(Color.Black)
+                        .padding(paddingValues)
                 ) {
-                    QuickStatCard(
-                        title = "Partner Ref ID",
-                        value = subscriberInfo.partnerReferenceId.ifEmpty { "Not Set" },
-                        icon = QrCode,
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickStatCard(
-                        title = "Zone",
-                        value = subscriberInfo.zone.ifEmpty { "Not Set" },
-                        icon = LocationOn,
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickStatCard(
-                        title = "Service No",
-                        value = subscriberInfo.serviceNumber.ifEmpty { "Not Set" },
-                        icon = ConfirmationNumber,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                    if (isLoadingSubscriberDetails) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = Color(0xFFE50914),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
 
-                // Main Account Section - Adjusted grid columns
-                val accountsSectionListItems = remember(userName, userEmail, userMobile, subscriberInfo) {
-                    listOf(
-                        // Basic Info
-                        AccountsSectionData(
-                            title = "Name",
-                            value = userName ?: "User",
-                            icon = Icons.Default.Person
-                        ),
-                        AccountsSectionData(
-                            title = "Email",
-                            value = userEmail ?: "Email not set",
-                            icon = Icons.Default.Email
-                        ),
-                        AccountsSectionData(
-                            title = "Mobile",
-                            value = userMobile ?: "Mobile not set",
-                            icon = Icons.Default.Phone
-                        ),
-
-                        // Partner/Subscriber Info
-                        AccountsSectionData(
-                            title = "Use Alt LCO Code",
-                            value = if (subscriberInfo.useAltLcoCode == "1") "Yes" else "No",
-                            icon = Icons.Default.Settings
-                        ),
-                        AccountsSectionData(
-                            title = "First Name",
-                            value = subscriberInfo.firstName.ifEmpty { "Not set" },
-                            icon = PersonOutline
-                        ),
-                        AccountsSectionData(
-                            title = "Last Name",
-                            value = subscriberInfo.lastName.ifEmpty { "Not set" },
-                            icon = PersonOutline
-                        ),
-                        AccountsSectionData(
-                            title = "Address",
-                            value = subscriberInfo.address.ifEmpty { "Not set" },
-                            icon = Icons.Default.Home
-                        ),
-                        AccountsSectionData(
-                            title = "Partner Reference ID",
-                            value = subscriberInfo.partnerReferenceId.ifEmpty { "Not set" },
-                            icon = QrCode
-                        ),
-                        AccountsSectionData(
-                            title = "Zone",
-                            value = subscriberInfo.zone.ifEmpty { "Not set" },
-                            icon = LocationOn
-                        ),
-                        AccountsSectionData(
-                            title = "Service Number",
-                            value = subscriberInfo.serviceNumber.ifEmpty { "Not set" },
-                            icon = ConfirmationNumber
-                        ),
-                        AccountsSectionData(
-                            title = "State Code",
-                            value = subscriberInfo.stateCode.ifEmpty { "Not set" },
-                            icon = Map
-                        ),
-
-                        // Actions
-                        AccountsSectionData(
-                            title = "Edit Subscriber Info",
-                            icon = Icons.Default.Edit,
-                            onClick = { showSubscriberInfo = true }
-                        ),
-                        AccountsSectionData(
-                            title = "Change Password",
-                            value = "Change",
-                            icon = Icons.Default.Lock,
-                            onClick = { /* Navigate to change password */ }
-                        ),
-                        AccountsSectionData(
-                            title = "View Subscriptions",
-                            icon = Subscriptions,
-                            onClick = { /* Navigate to subscriptions */ }
-                        ),
-                        AccountsSectionData(
-                            title = "Log Out",
-                            icon = Logout,
-                            onClick = {
-                                UserSession.clearSession(context)
-                                val intent = Intent(context, StartScreen::class.java)
-                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                context.startActivity(intent)
-                            }
-                        ),
-                        AccountsSectionData(
-                            title = "Delete Account",
-                            icon = Icons.Default.Delete,
-                            onClick = { showDeleteDialog = true }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = childPadding.start, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        QuickStatCard(
+                            title = "Partner Ref ID",
+                            value = subscriberInfo.partnerReferenceId.ifEmpty { "Not Set" },
+                            icon = QrCode,
+                            modifier = Modifier.weight(1f)
                         )
-                    )
-                }
+                        QuickStatCard(
+                            title = "Zone",
+                            value = subscriberInfo.zone.ifEmpty { "Not Set" },
+                            icon = LocationOn,
+                            modifier = Modifier.weight(1f)
+                        )
+                        QuickStatCard(
+                            title = "Service No",
+                            value = subscriberInfo.serviceNumber.ifEmpty { "Not Set" },
+                            icon = ConfirmationNumber,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
 
-                LazyVerticalGrid(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = childPadding.start),
-                    columns = GridCells.Fixed(3),
-                    content = {
+                    val accountsSectionListItems = remember(userName, userEmail, userMobile, subscriberInfo) {
+                        listOf(
+                            AccountsSectionData(
+                                title = "Name",
+                                value = userName ?: "User",
+                                icon = Icons.Default.Person
+                            ),
+                            AccountsSectionData(
+                                title = "Email",
+                                value = userEmail ?: "Email not set",
+                                icon = Icons.Default.Email
+                            ),
+                            AccountsSectionData(
+                                title = "Mobile",
+                                value = userMobile ?: "Mobile not set",
+                                icon = Icons.Default.Phone
+                            ),
+                            AccountsSectionData(
+                                title = "Use Alt LCO Code",
+                                value = if (subscriberInfo.useAltLcoCode == "1") "Yes" else "No",
+                                icon = Icons.Default.Settings
+                            ),
+                            AccountsSectionData(
+                                title = "First Name",
+                                value = subscriberInfo.firstName.ifEmpty { "Not set" },
+                                icon = PersonOutline
+                            ),
+                            AccountsSectionData(
+                                title = "Last Name",
+                                value = subscriberInfo.lastName.ifEmpty { "Not set" },
+                                icon = PersonOutline
+                            ),
+                            AccountsSectionData(
+                                title = "Address",
+                                value = subscriberInfo.address.ifEmpty { "Not set" },
+                                icon = Icons.Default.Home
+                            ),
+                            AccountsSectionData(
+                                title = "Partner Reference ID",
+                                value = subscriberInfo.partnerReferenceId.ifEmpty { "Not set" },
+                                icon = QrCode
+                            ),
+                            AccountsSectionData(
+                                title = "Zone",
+                                value = subscriberInfo.zone.ifEmpty { "Not set" },
+                                icon = LocationOn
+                            ),
+                            AccountsSectionData(
+                                title = "Service Number",
+                                value = subscriberInfo.serviceNumber.ifEmpty { "Not set" },
+                                icon = ConfirmationNumber
+                            ),
+                            AccountsSectionData(
+                                title = "State Code",
+                                value = subscriberInfo.stateCode.ifEmpty { "Not set" },
+                                icon = Map
+                            ),
+                            AccountsSectionData(
+                                title = "Edit Subscriber Info",
+                                icon = Icons.Default.Edit,
+                                onClick = { showSubscriberInfo = true }
+                            ),
+                            AccountsSectionData(
+                                title = "Change Password",
+                                value = "Change",
+                                icon = Icons.Default.Lock,
+                                onClick = { }
+                            ),
+                            AccountsSectionData(
+                                title = "View Subscriptions",
+                                icon = Subscriptions,
+                                onClick = { }
+                            ),
+                            AccountsSectionData(
+                                title = "Log Out",
+                                icon = Logout,
+                                onClick = {
+                                    if (!isLoggingOut) {
+                                        // Make sure deviceId is not null
+                                        val currentDeviceId = deviceId ?: UserSession.getDeviceId(context)
+                                        if (currentDeviceId != null) {
+                                            logoutViewModel.logout(currentDeviceId, context)
+                                        } else {
+                                            // Handle case where deviceId is null
+                                            Log.e("AccountsSection", "Device ID is null")
+                                            // Still clear local session
+                                            UserSession.clearSession(context)
+                                            val intent = Intent(context, StartScreen::class.java)
+                                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                            context.startActivity(intent)
+                                        }
+                                    }
+                                }
+                            ),
+                            AccountsSectionData(
+                                title = "Delete Account",
+                                icon = Icons.Default.Delete,
+                                onClick = { showDeleteDialog = true }
+                            )
+                        )
+                    }
+
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = childPadding.start),
+                        columns = GridCells.Fixed(3),
+                    ) {
                         items(accountsSectionListItems.size) { index ->
                             AccountsSelectionItem(
                                 modifier = Modifier
@@ -308,10 +380,43 @@ fun AccountsSection(
                             )
                         }
                     }
-                )
+                }
+
+                // Show loading indicator while logging out
+                if (isLoggingOut) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.7f))
+                            .clickable(enabled = false) { },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .width(200.dp)
+                                .padding(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFFE50914),
+                                    modifier = Modifier.size(40.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Logging out...",
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
-            // Subscriber Info Edit Dialog
             if (showSubscriberInfo) {
                 SubscriberInfoDialog(
                     subscriberInfo = subscriberInfo,
@@ -322,7 +427,7 @@ fun AccountsSection(
                     },
                     onSave = { updatedInfo ->
                         subscriberInfo = updatedInfo
-                        profileViewModel.updateSubscriberInfo(updatedInfo)
+                        profileViewModel.updateSubscriberInfo(updatedInfo, context)
                     }
                 )
             }
@@ -336,6 +441,7 @@ fun AccountsSection(
     }
 }
 
+
 @Composable
 fun QuickStatCard(
     title: String,
@@ -344,15 +450,15 @@ fun QuickStatCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.height(70.dp), // Reduced from 80dp to 70dp
+        modifier = modifier.height(70.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A1A)  // Dark gray, not pure black for contrast
+            containerColor = Color(0xFF1A1A1A)
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(6.dp), // Reduced padding from 8dp to 6dp
+                .padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -360,19 +466,19 @@ fun QuickStatCard(
                 imageVector = icon,
                 contentDescription = title,
                 tint = Color(0xFFE50914),
-                modifier = Modifier.size(18.dp) // Reduced from 20dp to 18dp
+                modifier = Modifier.size(18.dp)
             )
             Text(
                 text = value,
                 color = Color.White,
-                fontSize = 11.sp, // Reduced from 12sp to 11sp
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1
             )
             Text(
                 text = title,
                 color = Color.White.copy(alpha = 0.5f),
-                fontSize = 9.sp, // Reduced from 10sp to 9sp
+                fontSize = 9.sp,
                 maxLines = 1
             )
         }
@@ -415,41 +521,40 @@ fun SubscriberInfoDialog(
                     .heightIn(max = 400.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Use Alt LCO Code - Made more compact
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp), // Reduced from 8dp to 6dp
+                        .padding(vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Use Alt LCO Code:",
                         color = Color.White,
-                        fontSize = 13.sp, // Added explicit font size
+                        fontSize = 13.sp,
                         modifier = Modifier.weight(1f)
                     )
                     Row {
                         listOf("No (0)", "Yes (1)").forEachIndexed { index, option ->
                             Box(
                                 modifier = Modifier
-                                    .padding(horizontal = 3.dp) // Reduced from 4dp to 3dp
+                                    .padding(horizontal = 3.dp)
                                     .background(
                                         color = if ((index == 0 && useAltLcoCode == "0") ||
                                             (index == 1 && useAltLcoCode == "1"))
                                             Color(0xFFE50914)
                                         else
                                             Color(0xFF333333),
-                                        shape = RoundedCornerShape(3.dp) // Reduced from 4dp to 3dp
+                                        shape = RoundedCornerShape(3.dp)
                                     )
                                     .clickable(enabled = !isUpdating) {
                                         useAltLcoCode = if (index == 0) "0" else "1"
                                     }
-                                    .padding(horizontal = 10.dp, vertical = 5.dp) // Reduced padding
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {
                                 Text(
                                     text = option,
                                     color = Color.White,
-                                    fontSize = 12.sp // Added explicit font size
+                                    fontSize = 12.sp
                                 )
                             }
                         }
@@ -544,7 +649,7 @@ fun SubscriberInfoDialog(
             ) {
                 if (isUpdating) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp), // Reduced from 20dp to 18dp
+                        modifier = Modifier.size(18.dp),
                         color = Color(0xFFE50914)
                     )
                 } else {
@@ -560,7 +665,7 @@ fun SubscriberInfoDialog(
                 Text("Cancel", color = Color.White)
             }
         },
-        containerColor = Color(0xFF1A1A1A),  // Dark background for dialog
+        containerColor = Color(0xFF1A1A1A),
         titleContentColor = Color.White,
         textContentColor = Color.White
     )
@@ -580,22 +685,22 @@ fun SubscriberInfoField(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 3.dp) // Reduced from 4dp to 3dp
+            .padding(vertical = 3.dp)
     ) {
         Text(
             text = label,
             color = Color.White.copy(alpha = 0.7f),
-            fontSize = 11.sp, // Reduced from 12sp to 11sp
-            modifier = Modifier.padding(bottom = 3.dp) // Reduced from 4dp to 3dp
+            fontSize = 11.sp,
+            modifier = Modifier.padding(bottom = 3.dp)
         )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (isMultiline) 65.dp else 42.dp) // Reduced from 80dp/48dp to 65dp/42dp
+                .height(if (isMultiline) 65.dp else 42.dp)
                 .background(
                     color = if (isFocused) Color(0xFF333333) else Color(0xFF2A2A2A),
-                    shape = RoundedCornerShape(3.dp) // Reduced from 4dp to 3dp
+                    shape = RoundedCornerShape(3.dp)
                 )
                 .border(
                     width = 1.dp,
@@ -610,10 +715,10 @@ fun SubscriberInfoField(
                 onValueChange = onValueChange,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 10.dp, vertical = 6.dp), // Reduced padding
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
                 textStyle = LocalTextStyle.current.copy(
                     color = Color.White,
-                    fontSize = 13.sp // Reduced from 14sp to 13sp
+                    fontSize = 13.sp
                 ),
                 keyboardOptions = if (isNumber) {
                     KeyboardOptions(keyboardType = KeyboardType.Number)

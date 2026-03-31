@@ -136,7 +136,6 @@ androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name 
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation" }
 
 
-
 # Ktor and Networking
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }

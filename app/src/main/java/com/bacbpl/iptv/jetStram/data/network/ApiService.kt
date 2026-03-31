@@ -4,11 +4,13 @@ import com.bacbpl.iptv.jetStram.data.entities.TvChannel
 import com.bacbpl.iptv.jetStram.data.models.ApiMoviesResponse
 import com.bacbpl.iptv.jetStram.data.models.MovieCategoriesResponseItem
 import com.bacbpl.iptv.jetStram.data.models.OttWidgetResponse
+import com.bacbpl.iptv.jetStram.data.models.SubscriberDetailsResponse
 import com.bacbpl.iptv.jetStram.data.models.UpdateProfileResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
     @GET("api/movies/home")
@@ -34,7 +36,11 @@ interface ApiService {
         @Field("state_code") stateCode: String
     ): UpdateProfileResponse
 
-
     @GET("api/getChannels")
     suspend fun getTvChannels(): List<TvChannel>
+
+    @GET("api/getSubscriberDetails")
+    suspend fun getSubscriberDetails(
+        @Query("mobile") mobile: String
+    ): SubscriberDetailsResponse
 }

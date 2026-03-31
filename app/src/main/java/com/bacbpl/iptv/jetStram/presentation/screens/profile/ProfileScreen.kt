@@ -80,7 +80,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.bacbpl.iptv.ui.activities.StartScreen
 import com.bacbpl.iptv.utils.UserSession
-
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalTvMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -99,6 +98,12 @@ fun ProfileScreen(
     val focusManager = LocalFocusManager.current
     var isLeftColumnFocused by remember { mutableStateOf(false) }
 
+    // State for Privacy Policy Dialog
+    var showPrivacyPolicy by remember { mutableStateOf(false) }
+
+    // State for Contact Us Dialog
+    var showContactDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     // Logout handler
@@ -113,6 +118,27 @@ fun ProfileScreen(
 
         // Call the original onLogOut callback if needed
         onLogOut()
+    }
+
+    // Show Privacy Policy Dialog when needed
+    if (showPrivacyPolicy) {
+        PrivacyPolicyDialog(
+            onDismiss = { showPrivacyPolicy = false }
+        )
+    }
+
+    // Show Contact Us Dialog when needed
+    if (showContactDialog) {
+        ContactUsDialog(
+            onDismiss = { showContactDialog = false },
+            onSubmit = { name, email, subject, message ->
+                // Handle form submission - send to backend or email
+                // For now, just log and close
+                android.util.Log.d("ContactUs", "Name: $name, Email: $email, Subject: $subject, Message: $message")
+                // You can add API call here to submit the contact form
+                showContactDialog = false
+            }
+        )
     }
 
     Row(
@@ -220,7 +246,6 @@ fun ProfileScreen(
                         .clip(MaterialTheme.shapes.extraSmall)
                         .onFocusChanged { focusState ->
                             if (focusState.isFocused) {
-                                // Optional: Clear selection when focusing on Log Out
                                 isLeftColumnFocused = true
                             }
                         },
@@ -238,13 +263,12 @@ fun ProfileScreen(
 
         var selectedLanguageIndex by rememberSaveable { mutableIntStateOf(0) }
         var isSubtitlesChecked by rememberSaveable { mutableStateOf(true) }
+
         NavHost(
             modifier = Modifier
                 .fillMaxSize()
                 .onPreviewKeyEvent {
                     if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-                        // Using 'while' because AccountsScreen has a grid that has multiple items
-                        // in a row for which we would need to press D-Pad Left multiple times
                         while (!isLeftColumnFocused) {
                             focusManager.moveFocus(FocusDirection.Left)
                         }
@@ -295,19 +319,16 @@ fun ProfileScreen(
                     SearchHistorySection()
                 }
                 composable(ProfileScreens.HelpAndSupport()) {
-                    HelpAndSupportSection()
+                    HelpAndSupportSection(
+                        onNavigateToPrivacyPolicy = { showPrivacyPolicy = true },
+                        onNavigateToFAQ = {
+                            // Handle FAQ navigation - you can open a FAQ dialog or webview
+                            android.util.Log.d("ProfileScreen", "Navigate to FAQ")
+                        },
+                        onNavigateToContact = { showContactDialog = true }
+                    )
                 }
             }
         )
-    }
-}
-
-@Preview(device = Devices.TV_1080p)
-@Composable
-fun ProfileScreenPreview() {
-    JetStreamTheme {
-        Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-            ProfileScreen(onLogOut = {})
-        }
     }
 }

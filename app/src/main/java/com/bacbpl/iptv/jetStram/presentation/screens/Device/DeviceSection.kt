@@ -2,8 +2,9 @@ package com.bacbpl.iptv.jetStram.presentation.screens.Device
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.provider.Settings
+import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -33,7 +34,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import kotlinx.coroutines.delay
 import java.net.NetworkInterface
-import java.util.Locale
+import java.util.*
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -253,7 +254,7 @@ fun AnimatedDeviceCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                if (item.value != "Not Available") {
+                if (item.value != "Not Available" && !item.value.startsWith("Restricted") && !item.value.startsWith("UID:")) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
                         contentDescription = "Copy",
@@ -302,7 +303,7 @@ enum class DeviceInfoCategory(
 private fun getDeviceInfo(context: Context): List<DeviceInfoItem> {
     return listOf(
         DeviceInfoItem("Device ID", getDeviceId(context)),
-        DeviceInfoItem("MAC Address", getMacAddress()),
+        DeviceInfoItem("MAC Address", getMacAddress(context)),
         DeviceInfoItem("Device Model", getDeviceModel()),
         DeviceInfoItem("Manufacturer", getManufacturer()),
         DeviceInfoItem("Android Version", getAndroidVersion()),
@@ -323,20 +324,107 @@ private fun getDeviceId(context: Context): String {
     }
 }
 
-private fun getMacAddress(): String {
+private fun getMacAddress(context: Context): String {
     return try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+ - Use alternative methods
+            getMacAddressAndroid10Plus(context)
+        } else {
+            // Android 9 and below - Original method works
+            getMacAddressLegacy()
+        }
+    } catch (e: Exception) {
+        "Not Available"
+    }
+}
+
+@SuppressLint("HardwareIds")
+private fun getMacAddressAndroid10Plus(context: Context): String {
+    return try {
+        // Method 1: Try to get from WiFiManager (requires permission)
+        if (hasLocationPermission(context)) {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? android.net.wifi.WifiManager
+            val wifiInfo = wifiManager?.connectionInfo
+            val mac = wifiInfo?.macAddress
+            if (!mac.isNullOrEmpty() && mac != "02:00:00:00:00:00" && mac != "02:00:00:00:00:00") {
+                return mac.uppercase(Locale.getDefault())
+            }
+        }
+
+        // Method 2: Try using NetworkInterface (might still work for some devices)
         val networkInterfaces = NetworkInterface.getNetworkInterfaces()
         while (networkInterfaces.hasMoreElements()) {
             val networkInterface = networkInterfaces.nextElement()
             val mac = networkInterface.hardwareAddress
-            if (mac != null && networkInterface.name == "wlan0") {
+            if (mac != null && mac.isNotEmpty() &&
+                (networkInterface.name == "wlan0" || networkInterface.name == "eth0")) {
                 return mac.joinToString(":") { "%02x".format(it) }
                     .uppercase(Locale.getDefault())
             }
         }
-        "Not Available"
+
+        // Method 3: Fallback to device ID or generate a unique identifier
+        getPersistentUniqueId(context)
+    } catch (e: Exception) {
+        getPersistentUniqueId(context)
+    }
+}
+
+private fun getMacAddressLegacy(): String {
+    val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+    while (networkInterfaces.hasMoreElements()) {
+        val networkInterface = networkInterfaces.nextElement()
+        val mac = networkInterface.hardwareAddress
+        if (mac != null && networkInterface.name == "wlan0") {
+            return mac.joinToString(":") { "%02x".format(it) }
+                .uppercase(Locale.getDefault())
+        }
+    }
+    return "Not Available"
+}
+
+// Generate a persistent unique ID for the device (alternative to MAC address)
+@SuppressLint("HardwareIds")
+private fun getPersistentUniqueId(context: Context): String {
+    return try {
+        val sharedPref = context.getSharedPreferences("device_prefs", Context.MODE_PRIVATE)
+        var uniqueId = sharedPref.getString("unique_device_id", null)
+
+        if (uniqueId == null) {
+            // Combine multiple identifiers to create a unique ID
+            val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            val buildSerial = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                try {
+                    Build.getSerial()
+                } catch (e: SecurityException) {
+                    "serial_denied"
+                }
+            } else {
+                Build.SERIAL
+            }
+            val combined = "$androidId-$buildSerial-${Build.MANUFACTURER}-${Build.MODEL}"
+
+            // Create a hash of the combined string
+            uniqueId = combined.hashCode().toString(16).uppercase(Locale.getDefault())
+
+            // Store for persistence
+            sharedPref.edit().putString("unique_device_id", uniqueId).apply()
+        }
+
+        "UID: $uniqueId"
     } catch (e: Exception) {
         "Not Available"
+    }
+}
+
+private fun hasLocationPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ||
+                context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
+    } else {
+        true
     }
 }
 

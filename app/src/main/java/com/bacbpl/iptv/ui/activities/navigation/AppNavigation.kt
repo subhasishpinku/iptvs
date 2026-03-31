@@ -52,15 +52,13 @@ fun AppNavigation() {
 
         composable("signin") {
             SignInActivity(
-                onNavigateToOTP = { phoneNumber ->
-                    navController.navigate("otp/$phoneNumber")
+                onNavigateToOTP = { phone, deviceId, macId, deviceName ->
+                    navController.navigate("otp/$phone/$deviceId/$macId/$deviceName")
                 },
                 onNavigateToSignUp = {
                     navController.navigate("signup")
                 },
-                onNavigateToForgotPassword = {
-                    // Handle forgot password
-                },
+                onNavigateToForgotPassword = {},
                 onSkip = {
                     navController.navigate("main") {
                         popUpTo("signin") { inclusive = true }
@@ -68,22 +66,33 @@ fun AppNavigation() {
                 }
             )
         }
-
         composable(
-            route = "otp/{phoneNumber}",
-            arguments = listOf(navArgument("phoneNumber") { type = NavType.StringType })
+            route = "otp/{phone}/{deviceId}/{macId}/{deviceName}",
+            arguments = listOf(
+                navArgument("phone") { type = NavType.StringType },
+                navArgument("deviceId") { type = NavType.StringType },
+                navArgument("macId") { type = NavType.StringType },
+                navArgument("deviceName") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
-            val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+
+            val phone = backStackEntry.arguments?.getString("phone") ?: ""
+            val deviceId = backStackEntry.arguments?.getString("deviceId") ?: ""
+            val macId = backStackEntry.arguments?.getString("macId") ?: ""
+            val deviceName = backStackEntry.arguments?.getString("deviceName") ?: ""
+
             OTPActivity(
-                phoneNumber = phoneNumber,
+                phoneNumber = phone,
+                deviceId = deviceId,
+                macId = macId,
+                deviceName = deviceName,
                 onBack = { navController.popBackStack() },
-                onSubmit = { otp ->
-                    // After successful OTP verification, navigate to main
+                onSubmit = {
                     navController.navigate("main") {
                         popUpTo("signin") { inclusive = true }
                     }
                 },
-                onResend = { }
+                onResend = {}
             )
         }
 

@@ -203,6 +203,7 @@ dependencies {
 
     // Kotlin
     implementation(libs.kotlin.parcelize.runtime)
+    implementation("androidx.compose.ui:ui-viewbinding:1.6.0")
 
     baselineProfile(project(":benchmark"))
 }

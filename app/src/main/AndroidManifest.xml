@@ -22,6 +22,10 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!-- For Google Play Services -->
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
+    <!-- For Android 10+ - Required to get MAC address -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- TV Requirements -->
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -118,6 +122,9 @@
             android:name="com.google.android.gms.common.api.GoogleApiActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="false" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC-ppC-01qqiKhVO66MT6UM_b74a83zMe4" />
 </application>
 
     </manifest>
