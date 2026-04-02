@@ -206,16 +206,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import com.bacbpl.iptv.R
 import com.bacbpl.iptv.jetStram.data.entities.Movie
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.data.entities.MovieDetails
 import com.bacbpl.iptv.jetStram.presentation.common.Error
 import com.bacbpl.iptv.jetStram.presentation.common.Loading
 import com.bacbpl.iptv.jetStram.presentation.common.MoviesRow
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
-import com.bacbpl.iptv.jetStram.presentation.screens.movies.MovieDetailsScreenUiState
-import com.bacbpl.iptv.jetStram.presentation.screens.movies.MovieDetailsScreenViewModel
-import com.bacbpl.iptv.jetStram.presentation.screens.movies.MovieReviews
-import com.bacbpl.iptv.jetStram.presentation.screens.movies.TitleValueText
 import com.bacbpl.iptv.jetStram.presentation.screens.movies.MovieDetails as MovieDetailsComposable  // Rename the import to avoid conflict
 
 object MovieDetailsScreen {
@@ -298,7 +294,7 @@ private fun Details(
             MoviesRow(
                 title = StringConstants
                     .Composable
-                    .movieDetailsScreenSimilarTo(movieDetails.name),
+                    .movieDetailsScreenSimilarTo(movieDetails.name).toString(),
                 titleStyle = MaterialTheme.typography.titleMedium,
                 movieList = movieDetails.similarMovies,
                 onMovieSelected = refreshScreenWithNewMovie

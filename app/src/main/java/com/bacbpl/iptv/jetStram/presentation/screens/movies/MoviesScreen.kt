@@ -34,7 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bacbpl.iptv.jetStram.data.entities.Movie
 import com.bacbpl.iptv.jetStram.data.entities.MovieList
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.presentation.common.Loading
 import com.bacbpl.iptv.jetStram.presentation.common.MoviesRow
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
@@ -108,7 +108,7 @@ private fun Catalog(
         item {
             MoviesRow(
                 modifier = Modifier.padding(top = childPadding.top),
-                title = StringConstants.Composable.PopularFilmsThisWeekTitle,
+                title = StringConstants.Composable.PopularFilmsThisWeekTitle.toString(),
                 movieList = popularFilmsThisWeek,
                 onMovieSelected = onMovieClick
             )

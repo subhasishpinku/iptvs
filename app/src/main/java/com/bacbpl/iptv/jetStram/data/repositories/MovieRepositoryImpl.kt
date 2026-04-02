@@ -2,7 +2,7 @@ package com.bacbpl.iptv.jetStram.data.repositories
 
 // Remove the problematic import
 import com.bacbpl.iptv.jetStram.data.entities.*
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -113,16 +113,16 @@ class MovieRepositoryImpl @Inject constructor(
                 similarMovies = similarMovieList,
                 reviewsAndRatings = listOf(
                     MovieReviewsAndRatings(
-                        reviewerName = StringConstants.Movie.Reviewer.FreshTomatoes,
-                        reviewerIconUri = StringConstants.Movie.Reviewer.FreshTomatoesImageUrl,
+                        reviewerName = StringConstants.Movie.Reviewer.FreshTomatoes.toString(),
+                        reviewerIconUri = StringConstants.Movie.Reviewer.FreshTomatoesImageUrl.toString(),
                         reviewCount = "22",
                         reviewRating = "89%"
                     ),
                     MovieReviewsAndRatings(
-                        reviewerName = StringConstants.Movie.Reviewer.ReviewerName,
-                        reviewerIconUri = StringConstants.Movie.Reviewer.ImageUrl,
-                        reviewCount = StringConstants.Movie.Reviewer.DefaultCount,
-                        reviewRating = StringConstants.Movie.Reviewer.DefaultRating
+                        reviewerName = StringConstants.Movie.Reviewer.ReviewerName.toString(),
+                        reviewerIconUri = StringConstants.Movie.Reviewer.ImageUrl.toString(),
+                        reviewCount = StringConstants.Movie.Reviewer.DefaultCount.toString(),
+                        reviewRating = StringConstants.Movie.Reviewer.DefaultRating.toString()
                     ),
                 ),
             )
@@ -157,16 +157,16 @@ class MovieRepositoryImpl @Inject constructor(
                 similarMovies = similarMovieList,
                 reviewsAndRatings = listOf(
                     MovieReviewsAndRatings(
-                        reviewerName = StringConstants.Movie.Reviewer.FreshTomatoes,
-                        reviewerIconUri = StringConstants.Movie.Reviewer.FreshTomatoesImageUrl,
+                        reviewerName = StringConstants.Movie.Reviewer.FreshTomatoes.toString(),
+                        reviewerIconUri = StringConstants.Movie.Reviewer.FreshTomatoesImageUrl.toString(),
                         reviewCount = "22",
                         reviewRating = "89%"
                     ),
                     MovieReviewsAndRatings(
-                        reviewerName = StringConstants.Movie.Reviewer.ReviewerName,
-                        reviewerIconUri = StringConstants.Movie.Reviewer.ImageUrl,
-                        reviewCount = StringConstants.Movie.Reviewer.DefaultCount,
-                        reviewRating = StringConstants.Movie.Reviewer.DefaultRating
+                        reviewerName = StringConstants.Movie.Reviewer.ReviewerName.toString(),
+                        reviewerIconUri = StringConstants.Movie.Reviewer.ImageUrl.toString(),
+                        reviewCount = StringConstants.Movie.Reviewer.DefaultCount.toString(),
+                        reviewRating = StringConstants.Movie.Reviewer.DefaultRating.toString()
                     ),
                 ),
             )
@@ -220,15 +220,15 @@ class MovieRepositoryImpl @Inject constructor(
             similarMovies = emptyList(),
             reviewsAndRatings = listOf(
                 MovieReviewsAndRatings(
-                    reviewerName = StringConstants.Movie.Reviewer.FreshTomatoes,
-                    reviewerIconUri = StringConstants.Movie.Reviewer.FreshTomatoesImageUrl,
+                    reviewerName = StringConstants.Movie.Reviewer.FreshTomatoes.toString(),
+                    reviewerIconUri = StringConstants.Movie.Reviewer.FreshTomatoesImageUrl.toString(),
                     reviewCount = "22",
                     reviewRating = if (item.rating > 0) "${(item.rating * 10).toInt()}%" else "N/A"
                 ),
                 MovieReviewsAndRatings(
-                    reviewerName = StringConstants.Movie.Reviewer.ReviewerName,
-                    reviewerIconUri = StringConstants.Movie.Reviewer.ImageUrl,
-                    reviewCount = StringConstants.Movie.Reviewer.DefaultCount,
+                    reviewerName = StringConstants.Movie.Reviewer.ReviewerName.toString(),
+                    reviewerIconUri = StringConstants.Movie.Reviewer.ImageUrl.toString(),
+                    reviewCount = StringConstants.Movie.Reviewer.DefaultCount.toString(),
                     reviewRating = if (item.rating > 0) String.format("%.1f", item.rating) else "N/A"
                 ),
             ),

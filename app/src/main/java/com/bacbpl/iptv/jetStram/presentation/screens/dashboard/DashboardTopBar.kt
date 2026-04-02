@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -48,7 +46,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.LocalContentColor
@@ -57,11 +54,9 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import com.bacbpl.iptv.R
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.presentation.screens.Screens
-import com.bacbpl.iptv.jetStram.presentation.theme.IconSize
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamCardShape
-import com.bacbpl.iptv.jetStram.presentation.theme.LexendExa
 import com.bacbpl.iptv.jetStram.presentation.utils.occupyScreenSize
 
 val TopBarTabs = Screens.entries.toList().filter { it.isTabItem }
@@ -70,7 +65,7 @@ val TopBarTabs = Screens.entries.toList().filter { it.isTabItem }
 val TopBarFocusRequesters = List(size = TopBarTabs.size + 1) { FocusRequester() }
 
 private const val PROFILE_SCREEN_INDEX = -1
-
+// DashboardTopBar.kt - Update the DashboardTopBar composable
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DashboardTopBar(
@@ -81,22 +76,26 @@ fun DashboardTopBar(
     onScreenSelection: (screen: Screens) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+
+    // Get string resources outside of semantics block
+    val userAvatarDescription = stringResource(id = StringConstants.Composable.ContentDescription.UserAvatar)
+    val dashboardSearchDescription = stringResource(id = StringConstants.Composable.ContentDescription.DashboardSearchButton)
+
     Box(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 5.dp) // Reduced from 16.dp to 8.dp
+                .padding(top = 5.dp)
                 .background(MaterialTheme.colorScheme.surface)
                 .focusRestorer(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             UserAvatar(
                 modifier = Modifier
-                    .size(28.dp) // Reduced from 32.dp to 28.dp
+                    .size(28.dp)
                     .focusRequester(focusRequesters[0])
                     .semantics {
-                        contentDescription =
-                            StringConstants.Composable.ContentDescription.UserAvatar
+                        contentDescription = userAvatarDescription
                     },
                 selected = selectedTabIndex == PROFILE_SCREEN_INDEX,
                 onClick = {
@@ -108,7 +107,7 @@ fun DashboardTopBar(
             ) {
                 var isTabRowFocused by remember { mutableStateOf(false) }
 
-                Spacer(modifier = Modifier.width(16.dp)) // Reduced from 20.dp to 16.dp
+                Spacer(modifier = Modifier.width(16.dp))
                 TabRow(
                     modifier = Modifier
                         .onFocusChanged {
@@ -130,7 +129,7 @@ fun DashboardTopBar(
                         key(index) {
                             Tab(
                                 modifier = Modifier
-                                    .height(28.dp) // Reduced from 32.dp to 28.dp
+                                    .height(28.dp)
                                     .focusRequester(focusRequesters[index + 1]),
                                 selected = index == selectedTabIndex,
                                 onFocus = { onScreenSelection(screen) },
@@ -138,17 +137,122 @@ fun DashboardTopBar(
                             ) {
                                 if (screen.tabIcon != null) {
                                     Icon(
-                                        screen.tabIcon,
+                                        imageVector = screen.tabIcon,
                                         modifier = Modifier.padding(4.dp),
-                                        contentDescription = StringConstants.Composable
-                                            .ContentDescription.DashboardSearchButton,
+                                        contentDescription = dashboardSearchDescription,
+                                        tint = LocalContentColor.current
+                                    )
+                                } else {
+                                    // Get localized title using stringResource
+                                    val tabTitle = screen.titleResId?.let {
+                                        stringResource(id = it)
+                                    } ?: screen.name
+
+                                    Text(
+                                        modifier = Modifier
+                                            .occupyScreenSize()
+                                            .padding(horizontal = 12.dp),
+                                        text = tabTitle,
+                                        style = MaterialTheme.typography.titleSmall.copy(
+                                            color = LocalContentColor.current
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            JetStreamLogo(
+                modifier = Modifier
+                    .alpha(0.75f)
+                    .padding(end = 4.dp),
+            )
+        }
+    }
+}
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun DashboardTopBar1(
+    modifier: Modifier = Modifier,
+    selectedTabIndex: Int,
+    screens: List<Screens> = TopBarTabs,
+    focusRequesters: List<FocusRequester> = remember { TopBarFocusRequesters },
+    onScreenSelection: (screen: Screens) -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+
+    // Get string resources outside of semantics block
+    val userAvatarDescription = stringResource(id = StringConstants.Composable.ContentDescription.UserAvatar)
+    val dashboardSearchDescription = stringResource(id = StringConstants.Composable.ContentDescription.DashboardSearchButton)
+
+    Box(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp)
+                .background(MaterialTheme.colorScheme.surface)
+                .focusRestorer(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            UserAvatar(
+                modifier = Modifier
+                    .size(28.dp)
+                    .focusRequester(focusRequesters[0])
+                    .semantics {
+                        contentDescription = userAvatarDescription
+                    },
+                selected = selectedTabIndex == PROFILE_SCREEN_INDEX,
+                onClick = {
+                    onScreenSelection(Screens.Profile)
+                }
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                var isTabRowFocused by remember { mutableStateOf(false) }
+
+                Spacer(modifier = Modifier.width(16.dp))
+                TabRow(
+                    modifier = Modifier
+                        .onFocusChanged {
+                            isTabRowFocused = it.isFocused || it.hasFocus
+                        },
+                    selectedTabIndex = selectedTabIndex,
+                    indicator = { tabPositions, _ ->
+                        if (selectedTabIndex >= 0) {
+                            DashboardTopBarItemIndicator(
+                                currentTabPosition = tabPositions[selectedTabIndex],
+                                anyTabFocused = isTabRowFocused,
+                                shape = JetStreamCardShape
+                            )
+                        }
+                    },
+                    separator = { Spacer(modifier = Modifier) }
+                ) {
+                    screens.forEachIndexed { index, screen ->
+                        key(index) {
+                            Tab(
+                                modifier = Modifier
+                                    .height(28.dp)
+                                    .focusRequester(focusRequesters[index + 1]),
+                                selected = index == selectedTabIndex,
+                                onFocus = { onScreenSelection(screen) },
+                                onClick = { focusManager.moveFocus(FocusDirection.Down) },
+                            ) {
+                                if (screen.tabIcon != null) {
+                                    Icon(
+                                        imageVector = screen.tabIcon,
+                                        modifier = Modifier.padding(4.dp),
+                                        contentDescription = dashboardSearchDescription,
                                         tint = LocalContentColor.current
                                     )
                                 } else {
                                     Text(
                                         modifier = Modifier
                                             .occupyScreenSize()
-                                            .padding(horizontal = 12.dp), // Reduced from 16.dp to 12.dp
+                                            .padding(horizontal = 12.dp),
                                         text = screen(),
                                         style = MaterialTheme.typography.titleSmall.copy(
                                             color = LocalContentColor.current
@@ -164,7 +268,7 @@ fun DashboardTopBar(
             JetStreamLogo(
                 modifier = Modifier
                     .alpha(0.75f)
-                    .padding(end = 4.dp), // Reduced from 8.dp to 4.dp
+                    .padding(end = 4.dp),
             )
         }
     }
@@ -183,7 +287,7 @@ private fun JetStreamLogo(
             contentDescription = "JetStream Logo Image",
             modifier = Modifier
                 .padding(start = 4.dp)
-                .size(80.dp) // Reduced from 100.dp to 80.dp
+                .size(80.dp)
         )
     }
 }

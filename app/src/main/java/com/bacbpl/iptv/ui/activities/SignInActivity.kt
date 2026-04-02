@@ -1,5 +1,4 @@
 package com.bacbpl.iptv.ui.activities
-
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
@@ -55,6 +54,7 @@ fun SignInActivity(
     var phoneError by remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
+    var showDeviceInfo by remember { mutableStateOf(false) } // Set to false to hide
 
     // Permission launcher for Android 10+ to get MAC address
 // Permission launcher for Android 10+ to get MAC address
@@ -297,6 +297,7 @@ fun SignInActivity(
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
+                    Spacer(modifier = Modifier.height(50.dp))
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -352,87 +353,89 @@ fun SignInActivity(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         // Device ID (Read-only)
-                        OutlinedTextField(
-                            value = deviceId,
-                            onValueChange = {},
-                            label = { Text("Device ID", fontSize = 12.sp) },
-                            readOnly = true,
-                            enabled = false,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.Gray,
-                                cursorColor = Color.White,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                disabledTextColor = Color.White.copy(alpha = 0.7f),
-                                disabledBorderColor = Color.Gray,
-                                disabledLabelColor = Color.Gray
-                            ),
-                            textStyle = LocalTextStyle.current.copy(
-                                color = Color.White,
-                                fontSize = 12.sp
+                        if (showDeviceInfo) {
+
+                            OutlinedTextField(
+                                value = deviceId,
+                                onValueChange = {},
+                                label = { Text("Device ID", fontSize = 12.sp) },
+                                readOnly = true,
+                                enabled = false,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.White,
+                                    unfocusedBorderColor = Color.Gray,
+                                    cursorColor = Color.White,
+                                    focusedLabelColor = Color.White,
+                                    unfocusedLabelColor = Color.Gray,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    disabledTextColor = Color.White.copy(alpha = 0.7f),
+                                    disabledBorderColor = Color.Gray,
+                                    disabledLabelColor = Color.Gray
+                                ),
+                                textStyle = LocalTextStyle.current.copy(
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
                             )
-                        )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        // MAC ID (Read-only)
-                        OutlinedTextField(
-                            value = macId,
-                            onValueChange = {},
-                            label = { Text("MAC ID", fontSize = 12.sp) },
-                            readOnly = true,
-                            enabled = false,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.Gray,
-                                cursorColor = Color.White,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                disabledTextColor = Color.White.copy(alpha = 0.7f),
-                                disabledBorderColor = Color.Gray,
-                                disabledLabelColor = Color.Gray
-                            ),
-                            textStyle = LocalTextStyle.current.copy(
-                                color = Color.White,
-                                fontSize = 12.sp
+                            // MAC ID (Read-only)
+                            OutlinedTextField(
+                                value = macId,
+                                onValueChange = {},
+                                label = { Text("MAC ID", fontSize = 12.sp) },
+                                readOnly = true,
+                                enabled = false,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.White,
+                                    unfocusedBorderColor = Color.Gray,
+                                    cursorColor = Color.White,
+                                    focusedLabelColor = Color.White,
+                                    unfocusedLabelColor = Color.Gray,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    disabledTextColor = Color.White.copy(alpha = 0.7f),
+                                    disabledBorderColor = Color.Gray,
+                                    disabledLabelColor = Color.Gray
+                                ),
+                                textStyle = LocalTextStyle.current.copy(
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
                             )
-                        )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        // Device Name (Read-only)
-                        OutlinedTextField(
-                            value = deviceName,
-                            onValueChange = {},
-                            label = { Text("Device Name", fontSize = 12.sp) },
-                            readOnly = true,
-                            enabled = false,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White,
-                                unfocusedBorderColor = Color.Gray,
-                                cursorColor = Color.White,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                disabledTextColor = Color.White.copy(alpha = 0.7f),
-                                disabledBorderColor = Color.Gray,
-                                disabledLabelColor = Color.Gray
-                            ),
-                            textStyle = LocalTextStyle.current.copy(
-                                color = Color.White,
-                                fontSize = 12.sp
+                            // Device Name (Read-only)
+                            OutlinedTextField(
+                                value = deviceName,
+                                onValueChange = {},
+                                label = { Text("Device Name", fontSize = 12.sp) },
+                                readOnly = true,
+                                enabled = false,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.White,
+                                    unfocusedBorderColor = Color.Gray,
+                                    cursorColor = Color.White,
+                                    focusedLabelColor = Color.White,
+                                    unfocusedLabelColor = Color.Gray,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    disabledTextColor = Color.White.copy(alpha = 0.7f),
+                                    disabledBorderColor = Color.Gray,
+                                    disabledLabelColor = Color.Gray
+                                ),
+                                textStyle = LocalTextStyle.current.copy(
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
                             )
-                        )
-
+                        }
                         Spacer(modifier = Modifier.height(20.dp))
 
                         Button(
@@ -504,16 +507,16 @@ fun SignInActivity(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        TextButton(
-                            onClick = onNavigateToSignUp,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        ) {
-                            Text(
-                                text = "New here? Sign up now.",
-                                color = Color.White,
-                                fontSize = 11.sp
-                            )
-                        }
+//                        TextButton(
+//                            onClick = onNavigateToSignUp,
+//                            modifier = Modifier.align(Alignment.CenterHorizontally)
+//                        ) {
+//                            Text(
+//                                text = "New here? Sign up now.",
+//                                color = Color.White,
+//                                fontSize = 11.sp
+//                            )
+//                        }
                     }
                 }
             }

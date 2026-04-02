@@ -51,7 +51,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.bacbpl.iptv.jetStram.data.entities.Movie
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import  com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamBorderWidth
 
@@ -124,7 +124,7 @@ private fun MovieListItem(
                     contentDescription = StringConstants
                         .Composable
                         .ContentDescription
-                        .moviePoster(movie.name),
+                        .moviePoster(movie.name).toString(),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()

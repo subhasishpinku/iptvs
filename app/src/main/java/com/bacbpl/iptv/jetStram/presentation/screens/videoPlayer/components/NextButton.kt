@@ -25,7 +25,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.NextButtonState
 import androidx.media3.ui.compose.state.rememberNextButtonState
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -39,7 +39,7 @@ fun NextButton(
         icon = Icons.Default.SkipNext,
         isPlaying = player.isPlaying,
         contentDescription =
-            StringConstants.Composable.VideoPlayerControlSkipNextButton,
+            StringConstants.Composable.VideoPlayerControlSkipNextButton.toString(),
         onShowControls = onShowControls,
         onClick = state::onClick,
         modifier = modifier

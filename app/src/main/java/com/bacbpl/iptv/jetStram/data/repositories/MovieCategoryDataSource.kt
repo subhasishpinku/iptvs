@@ -19,7 +19,7 @@ package com.bacbpl.iptv.jetStram.data.repositories
 
 import com.bacbpl.iptv.jetStram.data.entities.toMovieCategory
 import com.bacbpl.iptv.jetStram.data.util.AssetsReader
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import javax.inject.Inject
 
 class MovieCategoryDataSource @Inject constructor(

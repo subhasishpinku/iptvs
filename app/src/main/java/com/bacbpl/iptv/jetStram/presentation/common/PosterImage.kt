@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bacbpl.iptv.jetStram.data.entities.Movie
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 
 @Composable
 fun PosterImage(
@@ -36,7 +36,7 @@ fun PosterImage(
             .crossfade(true)
             .data(movie.posterUri)
             .build(),
-        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(movie.name),
+        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(movie.name).toString(),
         contentScale = ContentScale.Crop
     )
 }

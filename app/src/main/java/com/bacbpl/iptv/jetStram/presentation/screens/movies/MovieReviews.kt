@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package  com.bacbpl.iptv.jetStram.presentation.screens.movies
+package com.bacbpl.iptv.jetStram.presentation.screens.movies
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -44,8 +44,8 @@ import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
 import com.bacbpl.iptv.R
 import com.bacbpl.iptv.jetStram.data.entities.MovieReviewsAndRatings
-import com.bacbpl.iptv.data.util.StringConstants
-import  com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamCardShape
 
 @Composable
@@ -83,6 +83,12 @@ private fun Review(
     reviewAndRating: MovieReviewsAndRatings,
     modifier: Modifier = Modifier
 ) {
+    // Get string resource with formatted count
+    val reviewCountText = stringResource(
+        id = StringConstants.Composable.reviewCount(reviewAndRating.reviewCount),
+        reviewAndRating.reviewCount
+    )
+
     Surface(
         onClick = {},
         tonalElevation = 1.dp,
@@ -135,9 +141,7 @@ private fun Review(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = StringConstants
-                            .Composable
-                            .reviewCount(reviewAndRating.reviewCount),
+                        text = reviewCountText,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.alpha(0.75f)
                     )

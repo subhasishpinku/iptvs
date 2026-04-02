@@ -40,7 +40,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.ProvideTextStyle
 import androidx.tv.material3.Text
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamCardShape
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -76,7 +76,7 @@ fun MovieFilterChip(
                 Icon(
                     Icons.Default.Check,
                     contentDescription =
-                        StringConstants.Composable.ContentDescription.FilterSelected,
+                        StringConstants.Composable.ContentDescription.FilterSelected.toString(),
                     modifier = Modifier.size(16.dp)
                 )
             }

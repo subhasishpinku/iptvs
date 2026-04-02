@@ -29,6 +29,8 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "PARTNER_API_URL", "\"https://partner.app.com\"")
+        multiDexEnabled = true
+
     }
 
     buildTypes {
@@ -46,6 +48,7 @@ android {
         viewBinding = false
         dataBinding = false
         buildConfig = true
+
 
     }
 
@@ -204,7 +207,7 @@ dependencies {
     // Kotlin
     implementation(libs.kotlin.parcelize.runtime)
     implementation("androidx.compose.ui:ui-viewbinding:1.6.0")
-
+    implementation("androidx.multidex:multidex:2.0.1")
     baselineProfile(project(":benchmark"))
 }
 

@@ -21,6 +21,7 @@ import android.os.Build
 import android.webkit.WebView
 import com.bacbpl.iptv.jetStram.data.repositories.MovieRepository
 import com.bacbpl.iptv.jetStram.data.repositories.MovieRepositoryImpl
+import com.bacbpl.iptv.utils.LanguageManager
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -43,6 +44,9 @@ class JetStreamApplication : Application() {
                 e.printStackTrace()
             }
         }
+
+        val savedLanguage = LanguageManager.getCurrentLanguage(this)
+        LanguageManager.setLocale(this, savedLanguage)
     }
 }
 

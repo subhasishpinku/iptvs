@@ -30,7 +30,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.RepeatButtonState
 import androidx.media3.ui.compose.state.rememberRepeatButtonState
 import androidx.tv.material3.LocalContentColor
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -38,7 +38,7 @@ fun RepeatButton(
     player: Player,
     modifier: Modifier = Modifier,
     state: RepeatButtonState = rememberRepeatButtonState(player),
-    contentDescription: String? = StringConstants.Composable.VideoPlayerControlRepeatButton,
+    contentDescription: String? = StringConstants.Composable.VideoPlayerControlRepeatButton.toString(),
     onShowControls: () -> Unit,
 ) {
     val repeatMode = state.repeatModeState

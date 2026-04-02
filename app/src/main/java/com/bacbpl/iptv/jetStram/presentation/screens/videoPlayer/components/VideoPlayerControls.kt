@@ -30,7 +30,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import com.bacbpl.iptv.jetStram.data.entities.MovieDetails
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 
 
 @Composable
@@ -73,21 +73,21 @@ fun VideoPlayerControls(
                     icon = Icons.Default.AutoAwesomeMotion,
                     isPlaying = isPlaying,
                     contentDescription =
-                        StringConstants.Composable.VideoPlayerControlPlaylistButton,
+                        StringConstants.Composable.VideoPlayerControlPlaylistButton.toString(),
                     onShowControls = onShowControls
                 )
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.ClosedCaption,
                     isPlaying = isPlaying,
                     contentDescription =
-                        StringConstants.Composable.VideoPlayerControlClosedCaptionsButton,
+                        StringConstants.Composable.VideoPlayerControlClosedCaptionsButton.toString(),
                     onShowControls = onShowControls
                 )
                 VideoPlayerControlsIcon(
                     icon = Icons.Default.Settings,
                     isPlaying = isPlaying,
                     contentDescription =
-                        StringConstants.Composable.VideoPlayerControlSettingsButton,
+                        StringConstants.Composable.VideoPlayerControlSettingsButton.toString(),
                     onShowControls = onShowControls
                 )
             }

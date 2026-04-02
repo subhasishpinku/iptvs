@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package  com.bacbpl.iptv.jetStram.presentation.screens.profile
+package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ListItem
 import androidx.tv.material3.ListItemDefaults
@@ -28,7 +29,7 @@ import androidx.tv.material3.Switch
 import androidx.tv.material3.SwitchDefaults
 import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamCardShape
 
 @Composable
@@ -36,58 +37,62 @@ fun SubtitlesSection(
     isSubtitlesChecked: Boolean,
     onSubtitleCheckChange: (isChecked: Boolean) -> Unit
 ) {
-    with(StringConstants.Composable.Placeholders) {
-        Column(modifier = Modifier.padding(horizontal = 72.dp)) {
-            Text(
-                text = SubtitlesSectionTitle,
-                style = MaterialTheme.typography.headlineSmall
-            )
-            ListItem(
-                modifier = Modifier.padding(top = 16.dp),
-                selected = false,
-                onClick = { onSubtitleCheckChange(!isSubtitlesChecked) },
-                trailingContent = {
-                    Switch(
-                        checked = isSubtitlesChecked,
-                        onCheckedChange = onSubtitleCheckChange,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primaryContainer,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary
-                        )
+    // Get string resources
+    val subtitlesSectionTitle = stringResource(id = StringConstants.Composable.Placeholders.SubtitlesSectionTitle)
+    val subtitlesSectionSubtitlesItem = stringResource(id = StringConstants.Composable.Placeholders.SubtitlesSectionSubtitlesItem)
+    val subtitlesSectionLanguageValue = stringResource(id = StringConstants.Composable.Placeholders.SubtitlesSectionLanguageValue)
+    val subtitlesSectionLanguageItem = stringResource(id = StringConstants.Composable.Placeholders.SubtitlesSectionLanguageItem)
+
+    Column(modifier = Modifier.padding(horizontal = 72.dp)) {
+        Text(
+            text = subtitlesSectionTitle,
+            style = MaterialTheme.typography.headlineSmall
+        )
+        ListItem(
+            modifier = Modifier.padding(top = 16.dp),
+            selected = false,
+            onClick = { onSubtitleCheckChange(!isSubtitlesChecked) },
+            trailingContent = {
+                Switch(
+                    checked = isSubtitlesChecked,
+                    onCheckedChange = onSubtitleCheckChange,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primaryContainer,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary
                     )
-                },
-                headlineContent = {
-                    Text(
-                        text = SubtitlesSectionSubtitlesItem,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-                ),
-                shape = ListItemDefaults.shape(shape = JetStreamCardShape)
-            )
-            ListItem(
-                modifier = Modifier.padding(top = 16.dp),
-                selected = false,
-                onClick = {},
-                trailingContent = {
-                    Text(
-                        text = SubtitlesSectionLanguageValue,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                },
-                headlineContent = {
-                    Text(
-                        text = SubtitlesSectionLanguageItem,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-                ),
-                shape = ListItemDefaults.shape(shape = JetStreamCardShape)
-            )
-        }
+                )
+            },
+            headlineContent = {
+                Text(
+                    text = subtitlesSectionSubtitlesItem,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+            ),
+            shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+        )
+        ListItem(
+            modifier = Modifier.padding(top = 16.dp),
+            selected = false,
+            onClick = {},
+            trailingContent = {
+                Text(
+                    text = subtitlesSectionLanguageValue,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            },
+            headlineContent = {
+                Text(
+                    text = subtitlesSectionLanguageItem,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+            ),
+            shape = ListItemDefaults.shape(shape = JetStreamCardShape)
+        )
     }
 }

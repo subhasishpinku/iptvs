@@ -68,8 +68,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.bacbpl.iptv.R
 import com.bacbpl.iptv.jetStram.data.entities.Movie
-import com.bacbpl.iptv.data.util.StringConstants
-import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamBorderWidth
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamButtonShape
 import com.bacbpl.iptv.jetStram.presentation.utils.Padding
 import com.bacbpl.iptv.jetStram.presentation.utils.handleDPadKeyEvents
@@ -102,7 +101,7 @@ fun FeaturedMoviesCarousel(
             }
             .semantics {
                 contentDescription =
-                    StringConstants.Composable.ContentDescription.MoviesCarousel
+                    StringConstants.Composable.ContentDescription.MoviesCarousel.toString()
             }
             .handleDPadKeyEvents(onEnter = {
                 goToVideoPlayer(movies[carouselState.activeItemIndex])
@@ -248,7 +247,7 @@ private fun CarouselItemBackground(movie: Movie, modifier: Modifier = Modifier) 
         contentDescription = StringConstants
             .Composable
             .ContentDescription
-            .moviePoster(movie.name),
+            .moviePoster(movie.name).toString(),
         modifier = modifier
             .drawWithContent {
                 drawContent()

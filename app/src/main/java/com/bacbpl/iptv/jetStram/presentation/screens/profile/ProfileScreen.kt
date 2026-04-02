@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+//
 package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
 import android.content.Context
@@ -79,7 +79,268 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.bacbpl.iptv.ui.activities.StartScreen
+import com.bacbpl.iptv.utils.LanguageManager
 import com.bacbpl.iptv.utils.UserSession
+import com.bacbpl.iptv.utils.rememberLanguageState
+
+//@OptIn(ExperimentalComposeUiApi::class, ExperimentalTvMaterial3Api::class)
+//@Composable
+//fun ProfileScreen(
+//    @FloatRange(from = 0.0, to = 1.0)
+//    sidebarWidthFraction: Float = 0.17f,
+//    onLogOut: () -> Unit = {}
+//) {
+//    val childPadding = rememberChildPadding()
+//    val profileNavController = rememberNavController()
+//    val context = LocalContext.current
+//
+//    val backStack by profileNavController.currentBackStackEntryAsState()
+//    val currentDestination =
+//        remember(backStack?.destination?.route) { backStack?.destination?.route }
+//    val focusRequester = remember { FocusRequester() }
+//    val focusManager = LocalFocusManager.current
+//    var isLeftColumnFocused by remember { mutableStateOf(false) }
+//
+//    // State for Privacy Policy Dialog
+//    var showPrivacyPolicy by remember { mutableStateOf(false) }
+//
+//    // State for Contact Us Dialog
+//    var showContactDialog by remember { mutableStateOf(false) }
+//
+//    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+//
+//    // Logout handler
+//    val handleLogout = {
+//        // Clear user session
+//        UserSession.clearSession(context)
+//
+//        // Navigate to StartScreen
+//        val intent = Intent(context, StartScreen::class.java)
+//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//        context.startActivity(intent)
+//
+//        // Call the original onLogOut callback if needed
+//        onLogOut()
+//    }
+//
+//    // Show Privacy Policy Dialog when needed
+//    if (showPrivacyPolicy) {
+//        PrivacyPolicyDialog(
+//            onDismiss = { showPrivacyPolicy = false }
+//        )
+//    }
+//
+//    // Show Contact Us Dialog when needed
+//    if (showContactDialog) {
+//        ContactUsDialog(
+//            onDismiss = { showContactDialog = false },
+//            onSubmit = { name, email, subject, message ->
+//                // Handle form submission - send to backend or email
+//                // For now, just log and close
+//                android.util.Log.d("ContactUs", "Name: $name, Email: $email, Subject: $subject, Message: $message")
+//                // You can add API call here to submit the contact form
+//                showContactDialog = false
+//            }
+//        )
+//    }
+//
+//    Row(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(horizontal = childPadding.start, vertical = childPadding.top)
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth(fraction = sidebarWidthFraction)
+//                .verticalScroll(rememberScrollState())
+//                .fillMaxHeight()
+//                .onFocusChanged {
+//                    isLeftColumnFocused = it.hasFocus
+//                }
+//                .focusRestorer()
+//                .focusGroup(),
+//            verticalArrangement = Arrangement.spacedBy(12.dp)
+//        ) {
+//            // Regular profile screens
+//            ProfileScreens.entries.forEachIndexed { index, profileScreen ->
+//                key(index) {
+//                    ListItem(
+//                        trailingContent = {
+//                            Icon(
+//                                profileScreen.icon,
+//                                modifier = Modifier
+//                                    .padding(vertical = 2.dp)
+//                                    .padding(start = 4.dp)
+//                                    .size(20.dp),
+//                                contentDescription = stringResource(
+//                                    id = R.string.profile_screen_listItem_icon_content_description,
+//                                    profileScreen.tabTitle
+//                                )
+//                            )
+//                        },
+//                        headlineContent = {
+//                            Text(
+//                                text = profileScreen.tabTitle,
+//                                style = MaterialTheme.typography.bodyMedium.copy(
+//                                    fontWeight = FontWeight.Medium
+//                                ),
+//                                modifier = Modifier.fillMaxWidth()
+//                            )
+//                        },
+//                        selected = currentDestination == profileScreen.name,
+//                        onClick = { focusManager.moveFocus(FocusDirection.Right) },
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .then(
+//                                if (index == 0) Modifier.focusRequester(focusRequester)
+//                                else Modifier
+//                            )
+//                            .onFocusChanged {
+//                                if (it.isFocused && currentDestination != profileScreen.name) {
+//                                    profileNavController.navigate(profileScreen()) {
+//                                        currentDestination?.let { nnCurrentDestination ->
+//                                            popUpTo(nnCurrentDestination) { inclusive = true }
+//                                        }
+//                                        launchSingleTop = true
+//                                    }
+//                                }
+//                            },
+//                        scale = ListItemDefaults.scale(focusedScale = 1f),
+//                        colors = ListItemDefaults.colors(
+//                            focusedContainerColor = MaterialTheme.colorScheme.inverseSurface,
+//                            selectedContainerColor = MaterialTheme.colorScheme.inverseSurface
+//                                .copy(alpha = 0.4f),
+//                            selectedContentColor = MaterialTheme.colorScheme.surface,
+//                        ),
+//                        shape = ListItemDefaults.shape(shape = MaterialTheme.shapes.extraSmall)
+//                    )
+//                }
+//            }
+//
+//            // Spacer to push Log Out to bottom
+//            Box(modifier = Modifier.weight(1f))
+//
+//            // Log Out item
+//            key("logout") {
+//                ListItem(
+//                    trailingContent = {
+//                        Icon(
+//                            Icons.Default.Logout,
+//                            modifier = Modifier
+//                                .padding(vertical = 2.dp)
+//                                .padding(start = 4.dp)
+//                                .size(20.dp),
+//                            contentDescription = stringResource(id = R.string.log_out)
+//                        )
+//                    },
+//                    headlineContent = {
+//                        Text(
+//                            text = stringResource(id = R.string.log_out),
+//                            style = MaterialTheme.typography.bodyMedium.copy(
+//                                fontWeight = FontWeight.Medium
+//                            ),
+//                            modifier = Modifier.fillMaxWidth()
+//                        )
+//                    },
+//                    selected = false,
+//                    onClick = { handleLogout() },
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clip(MaterialTheme.shapes.extraSmall)
+//                        .onFocusChanged { focusState ->
+//                            if (focusState.isFocused) {
+//                                isLeftColumnFocused = true
+//                            }
+//                        },
+//                    scale = ListItemDefaults.scale(focusedScale = 1f),
+//                    colors = ListItemDefaults.colors(
+//                        focusedContainerColor = MaterialTheme.colorScheme.errorContainer,
+//                        focusedContentColor = MaterialTheme.colorScheme.onErrorContainer,
+//                        containerColor = Color.Transparent,
+//                        contentColor = MaterialTheme.colorScheme.error
+//                    ),
+//                    shape = ListItemDefaults.shape(shape = MaterialTheme.shapes.extraSmall)
+//                )
+//            }
+//        }
+//
+//        var selectedLanguageIndex by rememberSaveable { mutableIntStateOf(0) }
+//        var isSubtitlesChecked by rememberSaveable { mutableStateOf(true) }
+//
+//        NavHost(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .onPreviewKeyEvent {
+//                    if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
+//                        while (!isLeftColumnFocused) {
+//                            focusManager.moveFocus(FocusDirection.Left)
+//                        }
+//                        return@onPreviewKeyEvent true
+//                    }
+//                    false
+//                },
+//            navController = profileNavController,
+//            startDestination = ProfileScreens.Accounts(),
+//            builder = {
+//                composable(ProfileScreens.Accounts()) {
+//                    AccountsSection()
+//                }
+//                composable(ProfileScreens.Subscribe()) {
+//                    SubscribeSection(
+//                        isSubtitlesChecked = isSubtitlesChecked,
+//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+//                    )
+//                }
+//                composable(ProfileScreens.Wallet()) {
+//                    WalletSection(
+//                        isSubtitlesChecked = isSubtitlesChecked,
+//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+//                    )
+//                }
+//                composable(ProfileScreens.Device()) {
+//                    DeviceSection(
+//                        isSubtitlesChecked = isSubtitlesChecked,
+//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+//                    )
+//                }
+//                composable(ProfileScreens.About()) {
+//                    AboutSection()
+//                }
+//                composable(ProfileScreens.Subtitles()) {
+//                    SubtitlesSection(
+//                        isSubtitlesChecked = isSubtitlesChecked,
+//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+//                    )
+//                }
+//                composable(ProfileScreens.Language()) {
+//                    LanguageSection(
+//                        selectedIndex = selectedLanguageIndex,
+//                        onSelectedIndexChange = { selectedLanguageIndex = it }
+//                    )
+//                }
+//                composable(ProfileScreens.SearchHistory()) {
+//                    SearchHistorySection()
+//                }
+//                composable(ProfileScreens.HelpAndSupport()) {
+//                    HelpAndSupportSection(
+//                        onNavigateToPrivacyPolicy = { showPrivacyPolicy = true },
+//                        onNavigateToFAQ = {
+//                            // Handle FAQ navigation - you can open a FAQ dialog or webview
+//                            android.util.Log.d("ProfileScreen", "Navigate to FAQ")
+//                        },
+//                        onNavigateToContact = { showContactDialog = true }
+//                    )
+//                }
+//            }
+//        )
+//    }
+//}
+
+// com/bacbpl/iptv/jetStram/presentation/screens/profile/ProfileScreen.kt
+// Add language selection handling
+
+// In your ProfileScreen composable, use it like this:
+
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalTvMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -92,8 +353,7 @@ fun ProfileScreen(
     val context = LocalContext.current
 
     val backStack by profileNavController.currentBackStackEntryAsState()
-    val currentDestination =
-        remember(backStack?.destination?.route) { backStack?.destination?.route }
+    val currentDestination = remember(backStack?.destination?.route) { backStack?.destination?.route }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     var isLeftColumnFocused by remember { mutableStateOf(false) }
@@ -104,19 +364,28 @@ fun ProfileScreen(
     // State for Contact Us Dialog
     var showContactDialog by remember { mutableStateOf(false) }
 
+    // ✅ CORRECT USAGE: Get language state
+    val languageState = rememberLanguageState()
+
+    // Get current language index for the LanguageSection
+    var selectedLanguageIndex by rememberSaveable {
+        mutableIntStateOf(
+            when (languageState.currentLanguage) {
+                LanguageManager.LANGUAGE_BENGALI -> 1
+                LanguageManager.LANGUAGE_HINDI -> 2
+                else -> 0
+            }
+        )
+    }
+
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     // Logout handler
     val handleLogout = {
-        // Clear user session
         UserSession.clearSession(context)
-
-        // Navigate to StartScreen
         val intent = Intent(context, StartScreen::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         context.startActivity(intent)
-
-        // Call the original onLogOut callback if needed
         onLogOut()
     }
 
@@ -132,10 +401,7 @@ fun ProfileScreen(
         ContactUsDialog(
             onDismiss = { showContactDialog = false },
             onSubmit = { name, email, subject, message ->
-                // Handle form submission - send to backend or email
-                // For now, just log and close
                 android.util.Log.d("ContactUs", "Name: $name, Email: $email, Subject: $subject, Message: $message")
-                // You can add API call here to submit the contact form
                 showContactDialog = false
             }
         )
@@ -161,6 +427,11 @@ fun ProfileScreen(
             // Regular profile screens
             ProfileScreens.entries.forEachIndexed { index, profileScreen ->
                 key(index) {
+                    // Get the title text - handle null case
+                    val titleText = profileScreen.tabTitle?.let {
+                        stringResource(id = it)
+                    } ?: profileScreen.name
+
                     ListItem(
                         trailingContent = {
                             Icon(
@@ -171,13 +442,13 @@ fun ProfileScreen(
                                     .size(20.dp),
                                 contentDescription = stringResource(
                                     id = R.string.profile_screen_listItem_icon_content_description,
-                                    profileScreen.tabTitle
+                                    titleText
                                 )
                             )
                         },
                         headlineContent = {
                             Text(
-                                text = profileScreen.tabTitle,
+                                text = titleText,
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Medium
                                 ),
@@ -261,7 +532,6 @@ fun ProfileScreen(
             }
         }
 
-        var selectedLanguageIndex by rememberSaveable { mutableIntStateOf(0) }
         var isSubtitlesChecked by rememberSaveable { mutableStateOf(true) }
 
         NavHost(
@@ -312,7 +582,15 @@ fun ProfileScreen(
                 composable(ProfileScreens.Language()) {
                     LanguageSection(
                         selectedIndex = selectedLanguageIndex,
-                        onSelectedIndexChange = { selectedLanguageIndex = it }
+                        onSelectedIndexChange = { index ->
+                            selectedLanguageIndex = index
+                            val languageCode = when (index) {
+                                1 -> LanguageManager.LANGUAGE_BENGALI
+                                2 -> LanguageManager.LANGUAGE_HINDI
+                                else -> LanguageManager.LANGUAGE_ENGLISH
+                            }
+                            languageState.updateLanguage(languageCode)
+                        }
                     )
                 }
                 composable(ProfileScreens.SearchHistory()) {
@@ -322,7 +600,6 @@ fun ProfileScreen(
                     HelpAndSupportSection(
                         onNavigateToPrivacyPolicy = { showPrivacyPolicy = true },
                         onNavigateToFAQ = {
-                            // Handle FAQ navigation - you can open a FAQ dialog or webview
                             android.util.Log.d("ProfileScreen", "Navigate to FAQ")
                         },
                         onNavigateToContact = { showContactDialog = true }

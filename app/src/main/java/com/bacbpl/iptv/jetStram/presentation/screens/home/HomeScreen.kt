@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,14 +23,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bacbpl.iptv.jetStram.data.entities.Movie
 import com.bacbpl.iptv.jetStram.data.entities.MovieList
 import com.bacbpl.iptv.jetStram.data.entities.TvChannel
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.data.entities.OttWidget
 import com.bacbpl.iptv.jetStram.data.entities.OttWidgetItem
 import com.bacbpl.iptv.jetStram.presentation.common.Error
 import com.bacbpl.iptv.jetStram.presentation.common.Loading
 import com.bacbpl.iptv.jetStram.presentation.common.MoviesRow
 import com.bacbpl.iptv.jetStram.presentation.common.OttWidgetRow
-import com.bacbpl.iptv.jetStram.presentation.common.TvChannelsRow
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
@@ -153,7 +151,7 @@ private fun Catalog(
             MoviesRow(
                 modifier = Modifier.padding(top = 10.dp),
                 movieList = trendingMovies,
-                title = StringConstants.Composable.HomeScreenTrendingTitle,
+                title = StringConstants.Composable.HomeScreenTrendingTitle.toString(),
                 onMovieSelected = onMovieClick
             )
         }
@@ -211,7 +209,7 @@ private fun Catalog(
             MoviesRow(
                 modifier = Modifier.padding(top = 10.dp),
                 movieList = nowPlayingMovies,
-                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
+                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle.toString(),
                 onMovieSelected = onMovieClick
             )
         }

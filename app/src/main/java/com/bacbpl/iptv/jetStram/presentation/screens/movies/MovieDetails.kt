@@ -35,7 +35,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bacbpl.iptv.R
 import com.bacbpl.iptv.data.SharedPrefManager
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.data.entities.MovieDetails
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamButtonShape
@@ -44,7 +44,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.*
 import org.json.JSONObject
-import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -85,7 +84,7 @@ fun MovieDetails(
                     contentDescription = StringConstants
                         .Composable
                         .ContentDescription
-                        .moviePoster(movieDetails.name),
+                        .moviePoster(movieDetails.name).toString(),
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxSize(),
                     onError = {

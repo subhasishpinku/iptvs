@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package  com.bacbpl.iptv.jetStram.presentation.screens.profile
+package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -29,10 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 
 @Composable
 fun AboutSection() {
@@ -41,40 +42,43 @@ fun AboutSection() {
         context.getVersionNumber()
     }
 
-    with(StringConstants.Composable.Placeholders) {
-        Column(modifier = Modifier.padding(horizontal = 72.dp)) {
-            Text(
-                text = AboutSectionTitle,
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Text(
-                modifier = Modifier
-                    .graphicsLayer { alpha = 0.8f }
-                    .padding(top = 16.dp),
-                text = AboutSectionDescription,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Box(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(MaterialTheme.colorScheme.border.copy(alpha = 0.6f))
-            )
-            Text(
-                modifier = Modifier
-                    .graphicsLayer { alpha = 0.6f }
-                    .padding(top = 16.dp),
-                text = AboutSectionAppVersionTitle,
-                style = MaterialTheme.typography.labelMedium
-            )
-            Text(
-                modifier = Modifier.padding(top = 8.dp),
-                text = versionNumber,
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
+    // Convert resource IDs to strings
+    val aboutSectionTitle = stringResource(id = StringConstants.Composable.Placeholders.AboutSectionTitle)
+    val aboutSectionDescription = stringResource(id = StringConstants.Composable.Placeholders.AboutSectionDescription)
+    val aboutSectionAppVersionTitle = stringResource(id = StringConstants.Composable.Placeholders.AboutSectionAppVersionTitle)
+
+    Column(modifier = Modifier.padding(horizontal = 72.dp)) {
+        Text(
+            text = aboutSectionTitle,
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Text(
+            modifier = Modifier
+                .graphicsLayer { alpha = 0.8f }
+                .padding(top = 16.dp),
+            text = aboutSectionDescription,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Box(
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(MaterialTheme.colorScheme.border.copy(alpha = 0.6f))
+        )
+        Text(
+            modifier = Modifier
+                .graphicsLayer { alpha = 0.6f }
+                .padding(top = 16.dp),
+            text = aboutSectionAppVersionTitle,
+            style = MaterialTheme.typography.labelMedium
+        )
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = versionNumber,
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }
 

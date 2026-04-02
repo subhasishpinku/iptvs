@@ -35,7 +35,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.PlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 
@@ -92,7 +92,7 @@ fun VideoPlayerSeeker(
             isPlaying = player.isPlaying,
             contentDescription = StringConstants
                 .Composable
-                .VideoPlayerControlPlayPauseButton
+                .VideoPlayerControlPlayPauseButton.toString()
         )
         VideoPlayerControllerText(text = contentProgressString)
         VideoPlayerControllerIndicator(

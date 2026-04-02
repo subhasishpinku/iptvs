@@ -18,20 +18,10 @@ package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,17 +31,17 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Button
@@ -63,12 +53,9 @@ import androidx.tv.material3.ListItemDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import androidx.tv.material3.surfaceColorAtElevation
-import com.bacbpl.iptv.data.util.StringConstants
+import com.bacbpl.iptv.R
+import com.bacbpl.iptv.jetStram.data.util.StringConstants
 import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamCardShape
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.compose.material3.Card
-import androidx.compose.ui.viewinterop.AndroidView
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -77,26 +64,28 @@ fun HelpAndSupportSection(
     onNavigateToFAQ: () -> Unit = {},
     onNavigateToContact: () -> Unit = {}
 ) {
-    with(StringConstants.Composable.Placeholders) {
-        Column(modifier = Modifier.padding(horizontal = 72.dp)) {
-            Text(
-                text = HelpAndSupportSectionTitle,
-                style = MaterialTheme.typography.headlineSmall
-            )
-            HelpAndSupportSectionItem(
-                title = HelpAndSupportSectionFAQItem,
-                onClick = onNavigateToFAQ
-            )
-            HelpAndSupportSectionItem(
-                title = HelpAndSupportSectionPrivacyItem,
-                onClick = onNavigateToPrivacyPolicy
-            )
-            HelpAndSupportSectionItem(
-                title = HelpAndSupportSectionContactItem,
-                value = HelpAndSupportSectionContactValue,
-                onClick = onNavigateToContact
-            )
-        }
+    // Get string resources
+    val helpAndSupportTitle = stringResource(id = StringConstants.Composable.Placeholders.HelpAndSupportSectionTitle)
+    val privacyPolicyItem = stringResource(id = StringConstants.Composable.Placeholders.HelpAndSupportSectionPrivacyItem)
+    val contactItem = stringResource(id = StringConstants.Composable.Placeholders.HelpAndSupportSectionContactItem)
+    val contactValue = stringResource(id = StringConstants.Composable.Placeholders.HelpAndSupportSectionContactValue)
+
+    Column(modifier = Modifier.padding(horizontal = 72.dp)) {
+        Text(
+            text = helpAndSupportTitle,
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        HelpAndSupportSectionItem(
+            title = privacyPolicyItem,
+            onClick = onNavigateToPrivacyPolicy
+        )
+
+        HelpAndSupportSectionItem(
+            title = contactItem,
+            value = contactValue,
+            onClick = onNavigateToContact
+        )
     }
 }
 
@@ -107,6 +96,8 @@ private fun HelpAndSupportSectionItem(
     value: String? = null,
     onClick: () -> Unit = {}
 ) {
+    val iconDescription = stringResource(id = StringConstants.Composable.Placeholders.HelpAndSupportSectionListItemIconDescription)
+
     ListItem(
         modifier = Modifier.padding(top = 16.dp),
         selected = false,
@@ -121,10 +112,7 @@ private fun HelpAndSupportSectionItem(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowForwardIos,
                     modifier = Modifier.size(ListItemDefaults.IconSizeDense),
-                    contentDescription = StringConstants
-                        .Composable
-                        .Placeholders
-                        .HelpAndSupportSectionListItemIconDescription
+                    contentDescription = iconDescription
                 )
             }
         },
@@ -169,7 +157,7 @@ fun PrivacyPolicyDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "Privacy Policy",
+                    text = stringResource(R.string.privacy_policy),
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -191,24 +179,7 @@ fun PrivacyPolicyDialog(
                             .verticalScroll(rememberScrollState())
                     ) {
                         Text(
-                            text = """
-                                BACBPL is committed to protecting any personal information that You may provide to Us. 
-                                
-                                In particular, We believe it is important for You to know how We treat information about You that We may receive from this Website "www.bacbpl.in" ("Site").
-                                
-                                In general, You can visit this site without telling Us who You are or revealing any information about Yourself. Our web servers collect the domain names, not the e-mail addresses of visitors.
-                                
-                                There are portions of this Site where We may need to collect personal information from You for a specific purpose. The information collected from You may include Your name, address, telephone, fax number, or e-mail address, etc. 
-                                
-                                This Privacy Policy is applicable to any personal information, which is given by You to Us ("User Information") via this Site and is devised to help You feel more confident about the privacy and security of Your personal details. When You leave Your contact details please note that We are not bound to reply.
-                                
-                                This Site is not intended for persons under 13 years of age. We do not knowingly solicit or collect personal information from or about children, and We do not knowingly market Our products or services to children.
-                                
-                                "You" shall mean You, the User of the Site and "Yourself" interpreted accordingly. "We" / "Us" means BACBPL and "Our" interpreted accordingly. "Users" means the Users of the Site collectively and/or individually as the context allows.
-                                
-                                For any questions regarding this privacy policy, please contact us at:
-                                support@bacbpl.in
-                            """.trimIndent(),
+                            text = stringResource(R.string.privacy_policy_content),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 20.sp
@@ -227,7 +198,7 @@ fun PrivacyPolicyDialog(
                     )
                 ) {
                     Text(
-                        text = "Close",
+                        text = stringResource(R.string.back),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -235,6 +206,7 @@ fun PrivacyPolicyDialog(
         }
     }
 }
+
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun ContactUsDialog(
@@ -245,7 +217,25 @@ fun ContactUsDialog(
     var email by remember { mutableStateOf("") }
     var subject by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
+    var mapLoadingError by remember { mutableStateOf(false) }
+    var webViewReady by remember { mutableStateOf(false) }
+
+    // Get localized strings
+    val contactInfo = stringResource(R.string.contact_info)
+    val phone = stringResource(R.string.contact_phone)
+    val emailText = stringResource(R.string.contact_email_address)
+    val website = stringResource(R.string.contact_website)
+    val companyName = stringResource(R.string.company_name)
+    val companyAddress = stringResource(R.string.company_address)
+    val openInGoogleMaps = stringResource(R.string.open_in_google_maps)
+    val sendUsMessage = stringResource(R.string.send_us_message)
+    val yourName = stringResource(R.string.your_name)
+    val yourEmail = stringResource(R.string.your_email)
+    val subjectText = stringResource(R.string.subject)
+    val messageText = stringResource(R.string.message)
+    val sendMessage = stringResource(R.string.send_message)
+    val back = stringResource(R.string.back)
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -277,26 +267,24 @@ fun ContactUsDialog(
                 ) {
 
                     Text(
-                        text = "Contact Info",
+                        text = contactInfo,
                         style = MaterialTheme.typography.titleLarge
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("Call: 03324548681 / 6289364699")
-                    Text("Email: sales@bacbpl.com")
-                    Text("Web: www.bacbpl.in")
+                    Text(phone)
+                    Text(emailText)
+                    Text(website)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "BHORER ALO CABLE AND BROADBAND PRIVATE",
+                        text = companyName,
                         style = MaterialTheme.typography.titleMedium
                     )
 
-                    Text(
-                        text = "29/2C, Chandra Nath Chatterjee Street\nBhowanipore, Kolkata 700025"
-                    )
+                    Text(companyAddress)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -311,15 +299,14 @@ fun ContactUsDialog(
                     ) {
                         Icon(Icons.Default.LocationOn, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Open in Google Maps")
+                        Text(openInGoogleMaps)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Map Preview using WebView with Google Maps Iframe and API Key
+                    // Map Preview - with fallback to static image
                     androidx.tv.material3.Card(
                         onClick = {
-                            // Open Google Maps when card is clicked
                             val url = "https://www.google.com/maps?q=22.5350378,88.3434308"
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                             context.startActivity(intent)
@@ -334,72 +321,100 @@ fun ContactUsDialog(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        AndroidView(
-                            factory = { ctx ->
-                                WebView(ctx).apply {
-                                    settings.apply {
-                                        javaScriptEnabled = true
-                                        loadWithOverviewMode = true
-                                        useWideViewPort = true
-                                        setSupportZoom(true)
-                                        builtInZoomControls = true
-                                        displayZoomControls = false
-                                        domStorageEnabled = true
+                        if (mapLoadingError || !webViewReady) {
+                            // Show static map image from drawable
+                            Image(
+                                painter = painterResource(id = R.drawable.map),
+                                contentDescription = "Location Map",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            AndroidView(
+                                factory = { ctx ->
+                                    WebView(ctx).apply {
+                                        settings.apply {
+                                            javaScriptEnabled = true
+                                            loadWithOverviewMode = true
+                                            useWideViewPort = true
+                                            setSupportZoom(true)
+                                            builtInZoomControls = true
+                                            displayZoomControls = false
+                                            domStorageEnabled = true
+                                        }
+                                        webViewClient = object : WebViewClient() {
+                                            override fun onPageFinished(view: WebView?, url: String?) {
+                                                super.onPageFinished(view, url)
+                                                webViewReady = true
+                                            }
+
+                                            override fun onReceivedError(
+                                                view: WebView?,
+                                                errorCode: Int,
+                                                description: String?,
+                                                failingUrl: String?
+                                            ) {
+                                                super.onReceivedError(view, errorCode, description, failingUrl)
+                                                mapLoadingError = true
+                                                webViewReady = false
+                                            }
+                                        }
+
+                                        // Google Maps Iframe with API key
+                                        val apiKey = "AIzaSyC-ppC-01qqiKhVO66MT6UM_b74a83zMe4"
+                                        val latitude = 22.5350378
+                                        val longitude = 88.3434308
+
+                                        val htmlContent = """
+                                            <!DOCTYPE html>
+                                            <html>
+                                            <head>
+                                                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+                                                <style>
+                                                    * {
+                                                        margin: 0;
+                                                        padding: 0;
+                                                        box-sizing: border-box;
+                                                    }
+                                                    body {
+                                                        margin: 0;
+                                                        padding: 0;
+                                                        height: 100%;
+                                                        width: 100%;
+                                                        overflow: hidden;
+                                                        background-color: #f0f0f0;
+                                                    }
+                                                    .map-container {
+                                                        height: 100%;
+                                                        width: 100%;
+                                                        position: relative;
+                                                    }
+                                                    iframe {
+                                                        width: 100%;
+                                                        height: 100%;
+                                                        border: 0;
+                                                    }
+                                                </style>
+                                            </head>
+                                            <body>
+                                                <div class="map-container">
+                                                    <iframe
+                                                        src="https://www.google.com/maps/embed/v1/place?key=$apiKey&q=$latitude,$longitude&zoom=16&maptype=roadmap"
+                                                        allowfullscreen>
+                                                    </iframe>
+                                                </div>
+                                            </body>
+                                            </html>
+                                        """.trimIndent()
+
+                                        loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
                                     }
-                                    webViewClient = WebViewClient()
-
-                                    // Google Maps Iframe with API key from your Firebase config
-                                    val apiKey = "AIzaSyC-ppC-01qqiKhVO66MT6UM_b74a83zMe4"
-                                    val latitude = 22.5350378
-                                    val longitude = 88.3434308
-
-                                    val htmlContent = """
-                                        <!DOCTYPE html>
-                                        <html>
-                                        <head>
-                                            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-                                            <style>
-                                                * {
-                                                    margin: 0;
-                                                    padding: 0;
-                                                    box-sizing: border-box;
-                                                }
-                                                body {
-                                                    margin: 0;
-                                                    padding: 0;
-                                                    height: 100%;
-                                                    width: 100%;
-                                                    overflow: hidden;
-                                                    background-color: #f0f0f0;
-                                                }
-                                                .map-container {
-                                                    height: 100%;
-                                                    width: 100%;
-                                                    position: relative;
-                                                }
-                                                iframe {
-                                                    width: 100%;
-                                                    height: 100%;
-                                                    border: 0;
-                                                }
-                                            </style>
-                                        </head>
-                                        <body>
-                                            <div class="map-container">
-                                                <iframe
-                                                    src="https://www.google.com/maps/embed/v1/place?key=$apiKey&q=$latitude,$longitude&zoom=16&maptype=roadmap"
-                                                    allowfullscreen>
-                                                </iframe>
-                                            </div>
-                                        </body>
-                                        </html>
-                                    """.trimIndent()
-
-                                    loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-                                }
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        )
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
 
@@ -412,7 +427,7 @@ fun ContactUsDialog(
                 ) {
 
                     Text(
-                        text = "Send us a message",
+                        text = sendUsMessage,
                         style = MaterialTheme.typography.headlineSmall
                     )
 
@@ -421,7 +436,7 @@ fun ContactUsDialog(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Your Name") },
+                        label = { Text(yourName) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -431,7 +446,7 @@ fun ContactUsDialog(
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Your Email") },
+                        label = { Text(yourEmail) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -442,7 +457,7 @@ fun ContactUsDialog(
                     OutlinedTextField(
                         value = subject,
                         onValueChange = { subject = it },
-                        label = { Text("Subject") },
+                        label = { Text(subjectText) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -452,7 +467,7 @@ fun ContactUsDialog(
                     OutlinedTextField(
                         value = message,
                         onValueChange = { message = it },
-                        label = { Text("Message") },
+                        label = { Text(messageText) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(120.dp),
@@ -467,7 +482,7 @@ fun ContactUsDialog(
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
-                        Text("SEND MESSAGE")
+                        Text(sendMessage)
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -479,7 +494,7 @@ fun ContactUsDialog(
                             containerColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
-                        Text("Cancel")
+                        Text(back)
                     }
                 }
             }

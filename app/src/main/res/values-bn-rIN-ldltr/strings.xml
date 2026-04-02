@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">bacbpliptv</string>
+    <string name="back">পিছনে</string>
+    <string name="log_out">লগ আউট</string>
+    <string name="generic_error_msg">%1s পাওয়া যায়নি। কারণ: %2s</string>
+    <string name="brand_logo_text">BACBPL আইপি টিভি</string>
+    <string name="watch_now">এখন দেখুন</string>
+    <string name="cast_and_crew"><![CDATA[অভিনয় ও কলাকুশলী]]></string>
+    <string name="director">পরিচালক</string>
+    <string name="screenplay">চিত্রনাট্য</string>
+    <string name="music">সঙ্গীত</string>
+    <string name="watch_trailer">ট্রেলার দেখুন</string>
+    <string name="status">অবস্থা</string>
+    <string name="original_language">মূল ভাষা</string>
+    <string name="budget">বাজেট</string>
+    <string name="revenue">আয়</string>
+    <string name="reviews">পর্যালোচনা</string>
+    <string name="delete_account_dialog_title">অ্যাকাউন্ট মুছে ফেলবেন?</string>
+    <string name="delete_account_dialog_text">আপনার অ্যাকাউন্ট নিষ্ক্রিয় করলে, আপনি আর সাইন ইন করতে পারবেন না, আপনার কার্যকলাপ JetStream থেকে সরানো হবে এবং আপনার প্রোফাইল পছন্দগুলি মুছে যাবে।\n\nআপনি কি চালিয়ে যেতে চান?\n</string>
+    <string name="yes_delete_account">হ্যাঁ, আমার অ্যাকাউন্ট মুছুন</string>
+    <string name="no_keep_it">না, রাখুন</string>
+    <string name="search_screen_et_placeholder">সিনেমা, শো এবং আরও অনেক কিছু খুঁজুন…</string>
+    <string name="top_10_movies_title">মার্কিন যুক্তরাষ্ট্রে শীর্ষ ১০</string>
+    <string name="profile_screen_listItem_icon_content_description">%s আইকন</string>
+    <string name="language_section_listItem_icon_content_description">%s ভাষার বিকল্প</string>
+    <string name="movie_category_desc">সিনেমা বিভাগ %s</string>
+    <string name="favorites_movies">সিনেমা</string>
+    <string name="favorites_tv_shows">টিভি শো</string>
+    <string name="favorites_added_last_week">গত সপ্তাহে যোগ হয়েছে</string>
+    <string name="favorites_available_in_4k">4K এ উপলব্ধ</string>
+    <string name="favorites_unknown">অজানা ফিল্টার</string>
+    <string name="ad">বিজ্ঞাপন</string>
+    <string name="live">সরাসরি</string>
+    <string name="message_loading">লোড হচ্ছে…</string>
+    <string name="message_error">ওহো, কিছু ভুল হয়েছে…</string>
+
+    <string name="browse_title"><![CDATA[আপনার কোম্পানির ভিডিও]]></string>
+    <string name="related_movies">সম্পর্কিত ভিডিও</string>
+    <string name="grid_view">গ্রিড ভিউ</string>
+    <string name="error_fragment">ত্রুটি খণ্ড</string>
+    <string name="personal_settings">ব্যক্তিগত সেটিংস</string>
+    <string name="watch_trailer_1">ট্রেলার দেখুন</string>
+    <string name="watch_trailer_2">বিনামূল্যে</string>
+    <string name="rent_1">দিনে ভাড়া</string>
+    <string name="rent_2">$1.99 থেকে</string>
+    <string name="buy_1">কিনুন এবং মালিক হন</string>
+    <string name="buy_2">$9.99 এ</string>
+    <string name="movie">সিনেমা</string>
+    <string name="error_fragment_message">একটি ত্রুটি ঘটেছে</string>
+    <string name="dismiss_error">বাতিল করুন</string>
+    <string name="tmdb">টিএমডিবি</string>
+    <string name="implement_search">আপনার নিজস্ব ইন-অ্যাপ অনুসন্ধান প্রয়োগ করুন।</string>
+    <string name="search_results">অনুসন্ধান ফলাফল</string>
+    <string name="main_movie">সিনেমা</string>
+    <string name="main_serial">টিভি শো</string>
+    <string name="main_news">সংবাদ</string>
+    <string name="main_sports">খেলাধুলা (লাইভ ম্যাচ)</string>
+    <string name="main_ott">অট</string>
+    <string name="ott_ply">অটপ্লে</string>
+    <string name="main_person">ব্যক্তি</string>
+    <string name="netflix">নেটফ্লিক্স</string>
+    <string name="youTub">ইউটিউব</string>
+    <string name="amazon">অ্যামাজন প্রাইম ভিডিও</string>
+    <string name="main_settings">সেটিংস</string>
+    <string name="h">ঘ</string>
+    <string name="min">মি</string>
+    <string name="mln">মি</string>
+    <string name="thous">হা</string>
+    <string name="status_ended">শেষ হয়েছে</string>
+    <string name="status_return">চলমান</string>
+    <string name="status_in_production">নির্মাণাধীন</string>
+    <string name="now_playing">এখন চলছে</string>
+    <string name="airing_today">আজ সম্প্রচারিত হচ্ছে</string>
+    <string name="on_tv">টিভিতে</string>
+    <string name="upcoming">আসন্ন</string>
+    <string name="popular">জনপ্রিয়</string>
+    <string name="top_rated">সর্বোচ্চ রেটেড</string>
+    <string name="main_tv_channel">টিভি চ্যানেল</string>
+    <string name="main_devotional">আধ্যাত্মিক</string>
+    <string name="main_music">সঙ্গীত</string>
+    <string name="main_game">গেম</string>
+    <string name="main_webWatch">ওয়েব ওয়াচ</string>
+    <string name="main_hot_star">হট স্টার</string>
+
+    <string name="status_released">মুক্তিপ্রাপ্ত</string>
+    <string name="budget_default">$১০ মিলিয়ন</string>
+    <string name="worldwide_gross_default">$২০ মিলিয়ন</string>
+    <string name="fresh_tomatoes">ফ্রেশ টমেটো</string>
+    <string name="rater_name">রেটার</string>
+    <string name="default_count">১.৮ মিলিয়ন</string>
+    <string name="default_rating">৯.২</string>
+    <string name="unknown_exception">অজানা ত্রুটি!</string>
+    <string name="invalid_category_id">অবৈধ বিভাগ আইডি!</string>
+    <string name="movie_poster_content_description">%s চলচ্চিত্রের পোস্টার</string>
+    <string name="image_content_description">%s এর ছবি</string>
+    <string name="movies_carousel">চলচ্চিত্র ক্যারোসেল</string>
+    <string name="user_avatar">ব্যবহারকারী প্রোফাইল বোতাম</string>
+    <string name="dashboard_search_button">ড্যাশবোর্ড অনুসন্ধান বোতাম</string>
+    <string name="brand_logo_image">ব্র্যান্ড লোগো চিত্র</string>
+    <string name="filter_selected">ফিল্টার নির্বাচিত</string>
+    <string name="reviewer_name_logo">%s এর লোগো</string>
+    <string name="category_details_failure">বিভাগের বিবরণ</string>
+    <string name="movies_failure">চলচ্চিত্র</string>
+    <string name="movie_details_failure">চলচ্চিত্রের বিবরণ</string>
+    <string name="home_screen_trending">ট্রেন্ডিং</string>
+    <string name="now_playing_movies">বর্তমানে চলছে</string>
+    <string name="popular_films_this_week">এই সপ্তাহের জনপ্রিয় চলচ্চিত্র</string>
+    <string name="binge_watch_dramas">বিঞ্জ ওয়াচ ড্রামা</string>
+    <string name="similar_to">%s এর অনুরূপ</string>
+    <string name="review_count">%s টি পর্যালোচনা</string>
+    <string name="about_section_title">BACBPL</string>
+    <string name="about_section_description">দৃষ্টি ও মিশন\n\nআমাদের দৃষ্টি হল শিল্পে নেতৃত্বের অবস্থান অর্জন করা একটি সমন্বিত সেবা প্রদানকারী হিসেবে, উন্নত প্রযুক্তিকে প্রান্ত হিসেবে ব্যবহার করে উচ্চতর বিষয়বস্তু, গুণমান এবং সেবা প্রদানের মাধ্যমে ভোক্তার একমাত্র পছন্দ হয়ে ওঠা। BACPL সামাজিক দায়বদ্ধতার উচ্চ মান বজায় রাখে, কারণ আমরা দৃঢ়ভাবে বিশ্বাস করি যে আমাদের উচিত সেই সমাজে অবদান রাখা যেখানে আমরা কাজ করি। আমরা আমাদের সমাজকে তাদের বৃদ্ধি ও উন্নয়নে সহায়তা করার জন্য সম্ভাব্য সব প্রযুক্তিগত সমাধান প্রদানের লক্ষ্য রাখি।</string>
+    <string name="app_version_title">অ্যাপ সংস্করণ</string>
+    <string name="language_section_title">ভাষা</string>
+    <string name="language_english_us">ইংরেজি (যুক্তরাষ্ট্র)</string>
+    <string name="language_english_uk">ইংরেজি (যুক্তরাজ্য)</string>
+    <string name="language_french">ফরাসি</string>
+    <string name="language_spanish">স্প্যানিশ</string>
+    <string name="language_hindi">हिंदी</string>
+    <string name="search_history_title">অনুসন্ধানের ইতিহাস</string>
+    <string name="search_history_clear_all">সব清除</string>
+    <string name="sample_search_1">দ্য লাইট নাইট</string>
+    <string name="sample_search_2">আইসবার্গ</string>
+    <string name="sample_search_3">জঙ্গল গাম্প</string>
+    <string name="sample_search_4">দ্য ডেভিলফাদার</string>
+    <string name="sample_search_5">স্পেস ওয়ার্স</string>
+    <string name="sample_search_6">দ্য লায়ন কুইন</string>
+    <string name="subtitles_settings">সেটিংস</string>
+    <string name="subtitles">সাবটাইটেল</string>
+    <string name="subtitles_language">সাবটাইটেল ভাষা</string>
+    <string name="english">ইংরেজি</string>
+    <string name="name">নাম</string>
+    <string name="email">ইমেইল</string>
+    <string name="mobile">মোবাইল</string>
+    <string name="default_email">jack@jetstream.com</string>
+    <string name="change_password">পাসওয়ার্ড পরিবর্তন</string>
+    <string name="password_placeholder">••••••••••••••</string>
+    <string name="add_new_account">নতুন অ্যাকাউন্ট যোগ করুন</string>
+    <string name="view_subscriptions">সাবস্ক্রিপশন দেখুন</string>
+    <string name="delete_account">অ্যাকাউন্ট মুছে ফেলুন</string>
+    <string name="help_and_support">সাহায্য এবং সহায়তা</string>
+    <string name="select_section">বিভাগ নির্বাচন করুন</string>
+    <string name="faq">প্রায়শই জিজ্ঞাসিত প্রশ্ন</string>
+    <string name="privacy_policy">গোপনীয়তা নীতি</string>
+    <string name="contact_us">যোগাযোগ করুন</string>
+    <string name="contact_email">helpdesk@bacbpl.in</string>
+    <string name="playlist_button">প্লেলিস্ট বোতাম</string>
+    <string name="closed_captions_button">ক্লোজড ক্যাপশন বোতাম</string>
+    <string name="settings_button">সেটিংস বোতাম</string>
+    <string name="play_pause_button">প্লে/পজ বোতাম</string>
+    <string name="fast_forward">১০ সেকেন্ড ফাস্ট ফরোয়ার্ড</string>
+    <string name="skip_next">পরবর্তী চলচ্চিত্রে যান</string>
+    <string name="skip_previous">পূর্ববর্তী চলচ্চিত্রে যান</string>
+    <string name="repeat_all">সব চলচ্চিত্র পুনরাবৃত্তি</string>
+    <string name="repeat_one">চলচ্চিত্র পুনরাবৃত্তি</string>
+    <string name="repeat_none">পুনরাবৃত্তি নেই</string>
+    <string name="repeat_button">পুনরাবৃত্তি বোতাম</string>
+    <string name="fresh_tomatoes_image_url"></string>
+    <string name="rater_image_url"></string>
+
+
+    <string name="profile_accounts">অ্যাকাউন্ট</string>
+    <string name="profile_subscribe">সাবস্ক্রাইব</string>
+    <string name="profile_payment">পেমেন্ট</string>
+    <string name="profile_device_info">ডিভাইস তথ্য</string>
+    <string name="profile_about">সম্পর্কে</string>
+    <string name="profile_subtitles">সাবটাইটেল</string>
+    <string name="profile_language">ভাষা</string>
+    <string name="profile_search_history">অনুসন্ধানের ইতিহাস</string>
+    <string name="profile_help_support">সাহায্য ও সহায়তা</string>
+
+
+    <string name="screen_home">হোম</string>
+    <string name="screen_categories">বিভাগসমূহ</string>
+    <string name="screen_movies">সিনেমা</string>
+    <string name="screen_live_tv">লাইভ টিভি</string>
+    <string name="screen_favourites">পছন্দসমূহ</string>
+    <string name="screen_news">সংবাদ</string>
+    <string name="screen_search">অনুসন্ধান</string>
+    <string name="screen_profile">প্রোফাইল</string>
+
+
+    <string name="privacy_policy_content">BACBPL আপনার প্রদত্ত যে কোনো ব্যক্তিগত তথ্য সুরক্ষিত রাখতে প্রতিশ্রুতিবদ্ধ।
+
+বিশেষ করে, আমরা বিশ্বাস করি যে আপনি কীভাবে আপনার সম্পর্কে তথ্য প্রক্রিয়া করি তা জানা আপনার জন্য গুরুত্বপূর্ণ যা আমরা এই ওয়েবসাইট "www.bacbpl.in" ("সাইট") থেকে পেতে পারি।
+
+সাধারণভাবে, আপনি আমাদের জানাতে পারেন বা আপনার সম্পর্কে কোনো তথ্য প্রকাশ না করেই এই সাইটটি দেখতে পারেন। আমাদের ওয়েব সার্ভারগুলি ডোমেইন নাম সংগ্রহ করে, দর্শকদের ই-মেইল ঠিকানা নয়।
+
+এই সাইটের কিছু অংশ রয়েছে যেখানে আমরা আপনার কাছ থেকে একটি নির্দিষ্ট উদ্দেশ্যে ব্যক্তিগত তথ্য সংগ্রহ করতে পারি। আপনার কাছ থেকে সংগৃহীত তথ্যের মধ্যে আপনার নাম, ঠিকানা, টেলিফোন, ফ্যাক্স নম্বর বা ই-মেইল ঠিকানা ইত্যাদি অন্তর্ভুক্ত থাকতে পারে।
+
+এই গোপনীয়তা নীতি কোনো ব্যক্তিগত তথ্যের জন্য প্রযোজ্য, যা আপনি আমাদের কাছে এই সাইটের মাধ্যমে প্রদান করেন ("ব্যবহারকারীর তথ্য") এবং এটি আপনার ব্যক্তিগত বিবরণের গোপনীয়তা এবং নিরাপত্তা সম্পর্কে আপনাকে আরও আত্মবিশ্বাসী করতে সাহায্য করার জন্য তৈরি করা হয়েছে। আপনি যখন আপনার যোগাযোগের বিবরণ দেন, অনুগ্রহ করে মনে রাখবেন যে আমরা উত্তর দিতে বাধ্য নই।
+
+এই সাইটটি 13 বছরের কম বয়সী ব্যক্তিদের জন্য নয়। আমরা ইচ্ছাকৃতভাবে শিশুদের কাছ থেকে বা সম্পর্কে ব্যক্তিগত তথ্য চাই না বা সংগ্রহ করি না এবং আমরা ইচ্ছাকৃতভাবে শিশুদের কাছে আমাদের পণ্য বা পরিষেবাগুলি বাজারজাত করি না।
+
+"আপনি" বলতে আপনি, সাইটের ব্যবহারকারী এবং "নিজেকে" সেই অনুযায়ী ব্যাখ্যা করা হবে। "আমরা" / "আমাদের" মানে BACBPL এবং "আমাদের" সেই অনুযায়ী ব্যাখ্যা করা হবে। "ব্যবহারকারী" বলতে প্রেক্ষাপটের অনুমতি অনুসারে সম্মিলিতভাবে এবং/অথবা পৃথকভাবে সাইটের ব্যবহারকারীদের বোঝায়।
+
+এই গোপনীয়তা নীতি সম্পর্কে কোনো প্রশ্নের জন্য, অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন:
+support@bacbpl.in</string>
+
+    <string name="contact_info">যোগাযোগের তথ্য</string>
+    <string name="contact_phone">কল করুন: ০৩৩২৪৫৪৮৬৮১ / ৬২৮৯৩৬৪৬৯৯</string>
+    <string name="contact_email_address">ইমেইল: sales@bacbpl.com</string>
+    <string name="contact_website">ওয়েব: www.bacbpl.in</string>
+    <string name="company_name">ভোরের আলো কেবল অ্যান্ড ব্রডব্যান্ড প্রাইভেট</string>
+    <string name="company_address">২৯/২সি, চন্দ্রনাথ চ্যাটার্জী স্ট্রিট\nভবানীপুর, কলকাতা ৭০০০২৫</string>
+    <string name="open_in_google_maps">গুগল ম্যাপে খুলুন</string>
+    <string name="send_us_message">আমাদের একটি বার্তা পাঠান</string>
+    <string name="your_name">আপনার নাম</string>
+    <string name="your_email">আপনার ইমেইল</string>
+    <string name="subject">বিষয়</string>
+    <string name="message">বার্তা</string>
+    <string name="send_message">বার্তা পাঠান</string>
+</resources>
