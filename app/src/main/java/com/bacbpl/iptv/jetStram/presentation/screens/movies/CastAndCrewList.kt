@@ -141,7 +141,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -258,7 +257,7 @@ private fun CastAndCrewItem(
                         model = ImageRequest.Builder(context)
                             .data(castMember.avatarUrl)
                             .crossfade(true)
-                            .error(R.drawable.logos) // Fallback image
+                            .error(R.drawable.logoss) // Fallback image
                             .build(),
                         contentDescription = castMember.realName,
                         modifier = Modifier.fillMaxSize(),

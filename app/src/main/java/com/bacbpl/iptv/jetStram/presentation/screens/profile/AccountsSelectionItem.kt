@@ -45,20 +45,22 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun AccountsSelectionItem(
     modifier: Modifier = Modifier,
-    key: Any?,
+    itemKey: Any?,  // Renamed from 'key' to 'itemKey' to avoid conflict with Kotlin keyword
     accountsSectionData: AccountsSectionData,
+    index: Int,
+    onFocusChanged: (Boolean) -> Unit = {}
 ) {
-    key(key) {
+    key(itemKey) {  // Use the renamed parameter here
         Surface(
             onClick = accountsSectionData.onClick,
             modifier = modifier
                 .padding(4.dp)
                 .fillMaxWidth()
-                .aspectRatio(3.5f),   // smaller box
+                .aspectRatio(3.5f),
             colors = ClickableSurfaceDefaults.colors(
-                containerColor = Color(0xFF1A1A1A), //
-                focusedContainerColor = Color(0xFFD3CCCC).copy(alpha = 0.8f), //
-                pressedContainerColor = Color(0xFFFFFFFF), //
+                containerColor = Color(0xFF1A1A1A),
+                focusedContainerColor = Color(0xFFD3CCCC).copy(alpha = 0.8f),
+                pressedContainerColor = Color(0xFFFFFFFF),
             ),
             shape = ClickableSurfaceDefaults.shape(shape = MaterialTheme.shapes.extraSmall),
             scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
@@ -66,22 +68,20 @@ fun AccountsSelectionItem(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(8.dp),   // smaller padding
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     accountsSectionData.icon?.let { icon ->
                         Icon(
                             imageVector = icon,
                             contentDescription = accountsSectionData.title,
                             tint = Color(0xFFE50914),
-                            modifier = Modifier.size(18.dp)   // smaller icon
+                            modifier = Modifier.size(18.dp)
                         )
                     } ?: Spacer(modifier = Modifier.size(18.dp))
 

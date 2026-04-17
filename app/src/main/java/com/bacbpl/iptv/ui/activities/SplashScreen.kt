@@ -9,7 +9,6 @@
     import androidx.compose.ui.draw.scale
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.platform.LocalContext
-    import androidx.compose.ui.unit.dp
     import androidx.constraintlayout.compose.ConstraintLayout
     import com.bacbpl.iptv.R
     import kotlinx.coroutines.delay
@@ -130,7 +129,7 @@
 
                 // Main Logo
                 AsyncImage(
-                    model = R.drawable.logos,
+                    model = R.drawable.logoss,
                     contentDescription = "App Logo",
                     modifier = Modifier
                         .constrainAs(logo) {

@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -152,7 +150,7 @@ fun OttWidgetItemCard(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(item.posterUrl)
                         .crossfade(true)
-                        .error(R.drawable.logos)
+                        .error(R.drawable.logoss)
                         .build(),
                     contentDescription = item.title,
                     modifier = Modifier.fillMaxSize(),

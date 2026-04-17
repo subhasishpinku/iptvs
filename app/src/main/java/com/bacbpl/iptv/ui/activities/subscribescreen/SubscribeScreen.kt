@@ -119,8 +119,9 @@ fun SubscribeUI() {
     // Auto navigate after 5 seconds
     LaunchedEffect(Unit) {
         delay(5000)
-        val intent = Intent(context, HomeScreen::class.java)
-        context.startActivity(intent)
+//        val intent = Intent(context, HomeScreen::class.java)
+//        val intent = Intent(context, JetStreamActivity::class.java)
+//        context.startActivity(intent)
     }
 
     val sharedPrefManager = remember { SharedPrefManager(context) }
@@ -129,11 +130,11 @@ fun SubscribeUI() {
     LaunchedEffect(navigateToProfile) {
         if (navigateToProfile) {
             delay(500) // Small delay to show error message
-            val intent = Intent(context, JetStreamActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("navigate_to_profile", true)
-            }
-            context.startActivity(intent)
+//            val intent = Intent(context, JetStreamActivity::class.java).apply {
+//                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                putExtra("navigate_to_profile", true)
+//            }
+//            context.startActivity(intent)
             planViewModel.clearNavigateToProfile()
         }
     }
@@ -713,7 +714,7 @@ fun SubscribeSection() {
 
         Button(
             onClick = {
-                val intent = Intent(context, HomeScreen::class.java)
+                val intent = Intent(context, JetStreamActivity::class.java)
                 context.startActivity(intent)
             },
             modifier = Modifier

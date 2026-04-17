@@ -2630,7 +2630,7 @@ fun ChannelGridItem(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(channel.logoUrl)
                     .crossfade(true)
-                    .error(R.drawable.logos)
+                    .error(R.drawable.logoss)
                     .build(),
                 contentDescription = channel.name,
                 modifier = Modifier
@@ -2768,7 +2768,7 @@ fun ChannelPreviewItem(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(channel.logoUrl)
                         .crossfade(true)
-                        .error(R.drawable.logos)
+                        .error(R.drawable.logoss)
                         .build(),
                     contentDescription = channel.name,
                     modifier = Modifier
@@ -2823,7 +2823,7 @@ fun PermanentChannelLogo(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logos),
+                painter = painterResource(id = R.drawable.logoss),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(120.dp)
@@ -2874,7 +2874,7 @@ fun ChannelInfoOverlay(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(channel.logoUrl)
                             .crossfade(true)
-                            .error(R.drawable.logos)
+                            .error(R.drawable.logoss)
                             .build(),
                         contentDescription = channel.name,
                         modifier = Modifier
@@ -2982,7 +2982,7 @@ fun SwipeChannelOverlay(
                                     model = ImageRequest.Builder(LocalContext.current)
                                         .data(previousChannel.logoUrl)
                                         .crossfade(true)
-                                        .error(R.drawable.logos)
+                                        .error(R.drawable.logoss)
                                         .build(),
                                     contentDescription = previousChannel.name,
                                     modifier = Modifier.fillMaxSize(),
@@ -3065,7 +3065,7 @@ fun SwipeChannelOverlay(
                                     model = ImageRequest.Builder(LocalContext.current)
                                         .data(nextChannel.logoUrl)
                                         .crossfade(true)
-                                        .error(R.drawable.logos)
+                                        .error(R.drawable.logoss)
                                         .build(),
                                     contentDescription = nextChannel.name,
                                     modifier = Modifier.fillMaxSize(),

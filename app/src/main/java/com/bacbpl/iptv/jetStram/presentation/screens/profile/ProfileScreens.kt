@@ -95,10 +95,10 @@ enum class ProfileScreens(
         icon = Icons.Default.Person,
         titleResId = R.string.profile_accounts
     ),
-    Subscribe(
-        icon = Icons.Default.Subscriptions,
-        titleResId = R.string.profile_subscribe
-    ),
+//    Subscribe(
+//        icon = Icons.Default.Subscriptions,
+//        titleResId = R.string.profile_subscribe
+//    ),
     Wallet(
         icon = Icons.Outlined.AccountBalanceWallet,
         titleResId = R.string.profile_payment
@@ -111,10 +111,10 @@ enum class ProfileScreens(
         icon = Icons.Default.Info,
         titleResId = R.string.profile_about
     ),
-    Subtitles(
-        icon = Icons.Default.Subtitles,
-        titleResId = R.string.profile_subtitles
-    ),
+//    Subtitles(
+//        icon = Icons.Default.Subtitles,
+//        titleResId = R.string.profile_subtitles
+//    ),
     Language(
         icon = Icons.Default.Translate,
         titleResId = R.string.profile_language

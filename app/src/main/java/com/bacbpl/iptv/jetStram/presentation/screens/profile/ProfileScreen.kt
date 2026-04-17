@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//
 package com.bacbpl.iptv.jetStram.presentation.screens.profile
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.annotation.FloatRange
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +27,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -57,9 +57,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -72,7 +71,6 @@ import androidx.tv.material3.Text
 import com.bacbpl.iptv.R
 import com.bacbpl.iptv.jetStram.presentation.screens.Device.DeviceSection
 import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadding
-import com.bacbpl.iptv.jetStram.presentation.theme.JetStreamTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.ui.draw.clip
@@ -82,270 +80,13 @@ import com.bacbpl.iptv.ui.activities.StartScreen
 import com.bacbpl.iptv.utils.LanguageManager
 import com.bacbpl.iptv.utils.UserSession
 import com.bacbpl.iptv.utils.rememberLanguageState
-
-//@OptIn(ExperimentalComposeUiApi::class, ExperimentalTvMaterial3Api::class)
-//@Composable
-//fun ProfileScreen(
-//    @FloatRange(from = 0.0, to = 1.0)
-//    sidebarWidthFraction: Float = 0.17f,
-//    onLogOut: () -> Unit = {}
-//) {
-//    val childPadding = rememberChildPadding()
-//    val profileNavController = rememberNavController()
-//    val context = LocalContext.current
-//
-//    val backStack by profileNavController.currentBackStackEntryAsState()
-//    val currentDestination =
-//        remember(backStack?.destination?.route) { backStack?.destination?.route }
-//    val focusRequester = remember { FocusRequester() }
-//    val focusManager = LocalFocusManager.current
-//    var isLeftColumnFocused by remember { mutableStateOf(false) }
-//
-//    // State for Privacy Policy Dialog
-//    var showPrivacyPolicy by remember { mutableStateOf(false) }
-//
-//    // State for Contact Us Dialog
-//    var showContactDialog by remember { mutableStateOf(false) }
-//
-//    LaunchedEffect(Unit) { focusRequester.requestFocus() }
-//
-//    // Logout handler
-//    val handleLogout = {
-//        // Clear user session
-//        UserSession.clearSession(context)
-//
-//        // Navigate to StartScreen
-//        val intent = Intent(context, StartScreen::class.java)
-//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//        context.startActivity(intent)
-//
-//        // Call the original onLogOut callback if needed
-//        onLogOut()
-//    }
-//
-//    // Show Privacy Policy Dialog when needed
-//    if (showPrivacyPolicy) {
-//        PrivacyPolicyDialog(
-//            onDismiss = { showPrivacyPolicy = false }
-//        )
-//    }
-//
-//    // Show Contact Us Dialog when needed
-//    if (showContactDialog) {
-//        ContactUsDialog(
-//            onDismiss = { showContactDialog = false },
-//            onSubmit = { name, email, subject, message ->
-//                // Handle form submission - send to backend or email
-//                // For now, just log and close
-//                android.util.Log.d("ContactUs", "Name: $name, Email: $email, Subject: $subject, Message: $message")
-//                // You can add API call here to submit the contact form
-//                showContactDialog = false
-//            }
-//        )
-//    }
-//
-//    Row(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(horizontal = childPadding.start, vertical = childPadding.top)
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth(fraction = sidebarWidthFraction)
-//                .verticalScroll(rememberScrollState())
-//                .fillMaxHeight()
-//                .onFocusChanged {
-//                    isLeftColumnFocused = it.hasFocus
-//                }
-//                .focusRestorer()
-//                .focusGroup(),
-//            verticalArrangement = Arrangement.spacedBy(12.dp)
-//        ) {
-//            // Regular profile screens
-//            ProfileScreens.entries.forEachIndexed { index, profileScreen ->
-//                key(index) {
-//                    ListItem(
-//                        trailingContent = {
-//                            Icon(
-//                                profileScreen.icon,
-//                                modifier = Modifier
-//                                    .padding(vertical = 2.dp)
-//                                    .padding(start = 4.dp)
-//                                    .size(20.dp),
-//                                contentDescription = stringResource(
-//                                    id = R.string.profile_screen_listItem_icon_content_description,
-//                                    profileScreen.tabTitle
-//                                )
-//                            )
-//                        },
-//                        headlineContent = {
-//                            Text(
-//                                text = profileScreen.tabTitle,
-//                                style = MaterialTheme.typography.bodyMedium.copy(
-//                                    fontWeight = FontWeight.Medium
-//                                ),
-//                                modifier = Modifier.fillMaxWidth()
-//                            )
-//                        },
-//                        selected = currentDestination == profileScreen.name,
-//                        onClick = { focusManager.moveFocus(FocusDirection.Right) },
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .then(
-//                                if (index == 0) Modifier.focusRequester(focusRequester)
-//                                else Modifier
-//                            )
-//                            .onFocusChanged {
-//                                if (it.isFocused && currentDestination != profileScreen.name) {
-//                                    profileNavController.navigate(profileScreen()) {
-//                                        currentDestination?.let { nnCurrentDestination ->
-//                                            popUpTo(nnCurrentDestination) { inclusive = true }
-//                                        }
-//                                        launchSingleTop = true
-//                                    }
-//                                }
-//                            },
-//                        scale = ListItemDefaults.scale(focusedScale = 1f),
-//                        colors = ListItemDefaults.colors(
-//                            focusedContainerColor = MaterialTheme.colorScheme.inverseSurface,
-//                            selectedContainerColor = MaterialTheme.colorScheme.inverseSurface
-//                                .copy(alpha = 0.4f),
-//                            selectedContentColor = MaterialTheme.colorScheme.surface,
-//                        ),
-//                        shape = ListItemDefaults.shape(shape = MaterialTheme.shapes.extraSmall)
-//                    )
-//                }
-//            }
-//
-//            // Spacer to push Log Out to bottom
-//            Box(modifier = Modifier.weight(1f))
-//
-//            // Log Out item
-//            key("logout") {
-//                ListItem(
-//                    trailingContent = {
-//                        Icon(
-//                            Icons.Default.Logout,
-//                            modifier = Modifier
-//                                .padding(vertical = 2.dp)
-//                                .padding(start = 4.dp)
-//                                .size(20.dp),
-//                            contentDescription = stringResource(id = R.string.log_out)
-//                        )
-//                    },
-//                    headlineContent = {
-//                        Text(
-//                            text = stringResource(id = R.string.log_out),
-//                            style = MaterialTheme.typography.bodyMedium.copy(
-//                                fontWeight = FontWeight.Medium
-//                            ),
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//                    },
-//                    selected = false,
-//                    onClick = { handleLogout() },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clip(MaterialTheme.shapes.extraSmall)
-//                        .onFocusChanged { focusState ->
-//                            if (focusState.isFocused) {
-//                                isLeftColumnFocused = true
-//                            }
-//                        },
-//                    scale = ListItemDefaults.scale(focusedScale = 1f),
-//                    colors = ListItemDefaults.colors(
-//                        focusedContainerColor = MaterialTheme.colorScheme.errorContainer,
-//                        focusedContentColor = MaterialTheme.colorScheme.onErrorContainer,
-//                        containerColor = Color.Transparent,
-//                        contentColor = MaterialTheme.colorScheme.error
-//                    ),
-//                    shape = ListItemDefaults.shape(shape = MaterialTheme.shapes.extraSmall)
-//                )
-//            }
-//        }
-//
-//        var selectedLanguageIndex by rememberSaveable { mutableIntStateOf(0) }
-//        var isSubtitlesChecked by rememberSaveable { mutableStateOf(true) }
-//
-//        NavHost(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .onPreviewKeyEvent {
-//                    if (it.key == Key.Back && it.type == KeyEventType.KeyUp) {
-//                        while (!isLeftColumnFocused) {
-//                            focusManager.moveFocus(FocusDirection.Left)
-//                        }
-//                        return@onPreviewKeyEvent true
-//                    }
-//                    false
-//                },
-//            navController = profileNavController,
-//            startDestination = ProfileScreens.Accounts(),
-//            builder = {
-//                composable(ProfileScreens.Accounts()) {
-//                    AccountsSection()
-//                }
-//                composable(ProfileScreens.Subscribe()) {
-//                    SubscribeSection(
-//                        isSubtitlesChecked = isSubtitlesChecked,
-//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
-//                    )
-//                }
-//                composable(ProfileScreens.Wallet()) {
-//                    WalletSection(
-//                        isSubtitlesChecked = isSubtitlesChecked,
-//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
-//                    )
-//                }
-//                composable(ProfileScreens.Device()) {
-//                    DeviceSection(
-//                        isSubtitlesChecked = isSubtitlesChecked,
-//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
-//                    )
-//                }
-//                composable(ProfileScreens.About()) {
-//                    AboutSection()
-//                }
-//                composable(ProfileScreens.Subtitles()) {
-//                    SubtitlesSection(
-//                        isSubtitlesChecked = isSubtitlesChecked,
-//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
-//                    )
-//                }
-//                composable(ProfileScreens.Language()) {
-//                    LanguageSection(
-//                        selectedIndex = selectedLanguageIndex,
-//                        onSelectedIndexChange = { selectedLanguageIndex = it }
-//                    )
-//                }
-//                composable(ProfileScreens.SearchHistory()) {
-//                    SearchHistorySection()
-//                }
-//                composable(ProfileScreens.HelpAndSupport()) {
-//                    HelpAndSupportSection(
-//                        onNavigateToPrivacyPolicy = { showPrivacyPolicy = true },
-//                        onNavigateToFAQ = {
-//                            // Handle FAQ navigation - you can open a FAQ dialog or webview
-//                            android.util.Log.d("ProfileScreen", "Navigate to FAQ")
-//                        },
-//                        onNavigateToContact = { showContactDialog = true }
-//                    )
-//                }
-//            }
-//        )
-//    }
-//}
-
-// com/bacbpl/iptv/jetStram/presentation/screens/profile/ProfileScreen.kt
-// Add language selection handling
-
-// In your ProfileScreen composable, use it like this:
+import androidx.compose.ui.platform.LocalConfiguration
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalTvMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     @FloatRange(from = 0.0, to = 1.0)
-    sidebarWidthFraction: Float = 0.17f,
+    sidebarWidthFraction: Float = 0.19f,
     onLogOut: () -> Unit = {}
 ) {
     val childPadding = rememberChildPadding()
@@ -364,7 +105,57 @@ fun ProfileScreen(
     // State for Contact Us Dialog
     var showContactDialog by remember { mutableStateOf(false) }
 
-    // ✅ CORRECT USAGE: Get language state
+    val configuration = LocalConfiguration.current
+    val width = configuration.screenWidthDp
+    val height = configuration.screenHeightDp
+
+    Log.d("ScreenSize", "Width: $width dp, Height: $height dp")
+
+    // Screen detection
+    val is540p = width >= 960 && height >= 540 && width < 1280
+    val is720p = width >= 1280 && height >= 720
+
+    // EXTREMELY COMPACT sizes for 540p to fit all items including logout
+    val listItemHeight = when {
+        is720p -> 52.dp
+        is540p -> 42.dp  // Even smaller to ensure logout fits
+        else -> 56.dp
+    }
+
+    val verticalSpacing = when {
+        is720p -> 4.dp
+        is540p -> 2.dp
+        else -> 6.dp
+    }
+
+    // Very small font for 540p
+    val fontSize = when {
+        is720p -> 13.sp
+        is540p -> 10.sp  // Small but readable on TV
+        else -> 16.sp
+    }
+
+    // Very small icon for 540p
+    val iconSize = when {
+        is720p -> 16.dp
+        is540p -> 12.dp
+        else -> 20.dp
+    }
+
+    // Calculate if all items will fit
+    val totalItems = ProfileScreens.entries.size + 1 // 9 + 1 = 10 items
+    val totalHeightNeeded = (listItemHeight * totalItems) + (verticalSpacing * (totalItems - 1))
+    val availableHeight = height.dp
+
+    Log.d("ProfileScreen", "=== SIZING INFO ===")
+    Log.d("ProfileScreen", "Total items: $totalItems")
+    Log.d("ProfileScreen", "Item height: $listItemHeight")
+    Log.d("ProfileScreen", "Spacing: $verticalSpacing")
+    Log.d("ProfileScreen", "Total needed: $totalHeightNeeded")
+    Log.d("ProfileScreen", "Available: $availableHeight")
+    Log.d("ProfileScreen", "Will fit: ${totalHeightNeeded <= availableHeight}")
+
+    // Get language state
     val languageState = rememberLanguageState()
 
     // Get current language index for the LanguageSection
@@ -415,19 +206,19 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth(fraction = sidebarWidthFraction)
-                .verticalScroll(rememberScrollState())
                 .fillMaxHeight()
+                // Keep scroll just in case, but with compact sizes it should fit
+                .verticalScroll(rememberScrollState())
                 .onFocusChanged {
                     isLeftColumnFocused = it.hasFocus
                 }
                 .focusRestorer()
                 .focusGroup(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing)
         ) {
-            // Regular profile screens
+            // ALL profile screens including Help and Support
             ProfileScreens.entries.forEachIndexed { index, profileScreen ->
                 key(index) {
-                    // Get the title text - handle null case
                     val titleText = profileScreen.tabTitle?.let {
                         stringResource(id = it)
                     } ?: profileScreen.name
@@ -437,9 +228,9 @@ fun ProfileScreen(
                             Icon(
                                 profileScreen.icon,
                                 modifier = Modifier
-                                    .padding(vertical = 2.dp)
+                                    .padding(vertical = if (is540p) 0.dp else 2.dp)
                                     .padding(start = 4.dp)
-                                    .size(20.dp),
+                                    .size(iconSize),
                                 contentDescription = stringResource(
                                     id = R.string.profile_screen_listItem_icon_content_description,
                                     titleText
@@ -450,15 +241,21 @@ fun ProfileScreen(
                             Text(
                                 text = titleText,
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = fontSize
                                 ),
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                maxLines = 1,
+                                letterSpacing = if (is540p) 0.sp else 0.5.sp  // Tighter spacing for 540p
                             )
                         },
                         selected = currentDestination == profileScreen.name,
-                        onClick = { focusManager.moveFocus(FocusDirection.Right) },
+                        onClick = {
+                            focusManager.moveFocus(FocusDirection.Right)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(listItemHeight)
                             .then(
                                 if (index == 0) Modifier.focusRequester(focusRequester)
                                 else Modifier
@@ -485,19 +282,17 @@ fun ProfileScreen(
                 }
             }
 
-            // Spacer to push Log Out to bottom
-            Box(modifier = Modifier.weight(1f))
-
-            // Log Out item
+            // LOGOUT ITEM - Must be visible
+            // Remove the spacer Box that was pushing it down
             key("logout") {
                 ListItem(
                     trailingContent = {
                         Icon(
                             Icons.Default.Logout,
                             modifier = Modifier
-                                .padding(vertical = 2.dp)
+                                .padding(vertical = if (is540p) 0.dp else 2.dp)
                                 .padding(start = 4.dp)
-                                .size(20.dp),
+                                .size(iconSize),
                             contentDescription = stringResource(id = R.string.log_out)
                         )
                     },
@@ -505,7 +300,8 @@ fun ProfileScreen(
                         Text(
                             text = stringResource(id = R.string.log_out),
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                fontSize = fontSize
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -514,6 +310,7 @@ fun ProfileScreen(
                     onClick = { handleLogout() },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .height(listItemHeight)
                         .clip(MaterialTheme.shapes.extraSmall)
                         .onFocusChanged { focusState ->
                             if (focusState.isFocused) {
@@ -550,14 +347,18 @@ fun ProfileScreen(
             startDestination = ProfileScreens.Accounts(),
             builder = {
                 composable(ProfileScreens.Accounts()) {
-                    AccountsSection()
-                }
-                composable(ProfileScreens.Subscribe()) {
-                    SubscribeSection(
-                        isSubtitlesChecked = isSubtitlesChecked,
-                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+                    AccountsSection(
+                        onNavigateToLeft = {
+                            focusManager.moveFocus(FocusDirection.Left)
+                        }
                     )
                 }
+//                composable(ProfileScreens.Subscribe()) {
+//                    SubscribeSection(
+//                        isSubtitlesChecked = isSubtitlesChecked,
+//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+//                    )
+//                }
                 composable(ProfileScreens.Wallet()) {
                     WalletSection(
                         isSubtitlesChecked = isSubtitlesChecked,
@@ -573,12 +374,12 @@ fun ProfileScreen(
                 composable(ProfileScreens.About()) {
                     AboutSection()
                 }
-                composable(ProfileScreens.Subtitles()) {
-                    SubtitlesSection(
-                        isSubtitlesChecked = isSubtitlesChecked,
-                        onSubtitleCheckChange = { isSubtitlesChecked = it }
-                    )
-                }
+//                composable(ProfileScreens.Subtitles()) {
+//                    SubtitlesSection(
+//                        isSubtitlesChecked = isSubtitlesChecked,
+//                        onSubtitleCheckChange = { isSubtitlesChecked = it }
+//                    )
+//                }
                 composable(ProfileScreens.Language()) {
                     LanguageSection(
                         selectedIndex = selectedLanguageIndex,

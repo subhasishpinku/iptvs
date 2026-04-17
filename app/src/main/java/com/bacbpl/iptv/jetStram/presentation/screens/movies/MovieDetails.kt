@@ -79,7 +79,7 @@ fun MovieDetails(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(movieDetails.posterUri)
                         .crossfade(true)
-                        .error(R.drawable.logos)
+                        .error(R.drawable.logoss)
                         .build(),
                     contentDescription = StringConstants
                         .Composable

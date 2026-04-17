@@ -6,9 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -16,17 +18,26 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,13 +77,15 @@ data class SubscriberInfo(
     val stateCode: String = ""
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AccountsSection(
     profileViewModel: ProfileViewModel = hiltViewModel(),
-    logoutViewModel: LogoutViewModel = hiltViewModel()
+    logoutViewModel: LogoutViewModel = hiltViewModel(),
+    onNavigateToLeft: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val isLoggedIn by UserSession.isLoggedIn.collectAsState()
     val userName by UserSession.userName.collectAsState()
     val userEmail by UserSession.userEmail.collectAsState()
@@ -83,6 +96,7 @@ fun AccountsSection(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showSubscriberInfo by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    var focusedItemIndex by remember { mutableIntStateOf(0) }
 
     val updateProfileState by profileViewModel.updateProfileState.collectAsState()
     val isUpdating by profileViewModel.isUpdating.collectAsState()
@@ -104,7 +118,6 @@ fun AccountsSection(
                     message,
                     duration = SnackbarDuration.Short
                 )
-                // Navigate to StartScreen
                 val intent = Intent(context, StartScreen::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 context.startActivity(intent)
@@ -116,7 +129,6 @@ fun AccountsSection(
                     error,
                     duration = SnackbarDuration.Short
                 )
-                // Even on error, we should clear local session
                 UserSession.clearSession(context)
                 val intent = Intent(context, StartScreen::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -278,36 +290,36 @@ fun AccountsSection(
                                 value = userMobile ?: "Mobile not set",
                                 icon = Icons.Default.Phone
                             ),
-                            AccountsSectionData(
-                                title = "Use Alt LCO Code",
-                                value = if (subscriberInfo.useAltLcoCode == "1") "Yes" else "No",
-                                icon = Icons.Default.Settings
-                            ),
-                            AccountsSectionData(
-                                title = "First Name",
-                                value = subscriberInfo.firstName.ifEmpty { "Not set" },
-                                icon = PersonOutline
-                            ),
-                            AccountsSectionData(
-                                title = "Last Name",
-                                value = subscriberInfo.lastName.ifEmpty { "Not set" },
-                                icon = PersonOutline
-                            ),
+//                            AccountsSectionData(
+//                                title = "Use Alt LCO Code",
+//                                value = if (subscriberInfo.useAltLcoCode == "1") "Yes" else "No",
+//                                icon = Icons.Default.Settings
+//                            ),
+//                            AccountsSectionData(
+//                                title = "First Name",
+//                                value = subscriberInfo.firstName.ifEmpty { "Not set" },
+//                                icon = PersonOutline
+//                            ),
+//                            AccountsSectionData(
+//                                title = "Last Name",
+//                                value = subscriberInfo.lastName.ifEmpty { "Not set" },
+//                                icon = PersonOutline
+//                            ),
                             AccountsSectionData(
                                 title = "Address",
                                 value = subscriberInfo.address.ifEmpty { "Not set" },
                                 icon = Icons.Default.Home
                             ),
-                            AccountsSectionData(
-                                title = "Partner Reference ID",
-                                value = subscriberInfo.partnerReferenceId.ifEmpty { "Not set" },
-                                icon = QrCode
-                            ),
-                            AccountsSectionData(
-                                title = "Zone",
-                                value = subscriberInfo.zone.ifEmpty { "Not set" },
-                                icon = LocationOn
-                            ),
+//                            AccountsSectionData(
+//                                title = "Partner Reference ID",
+//                                value = subscriberInfo.partnerReferenceId.ifEmpty { "Not set" },
+//                                icon = QrCode
+//                            ),
+//                            AccountsSectionData(
+//                                title = "Zone",
+//                                value = subscriberInfo.zone.ifEmpty { "Not set" },
+//                                icon = LocationOn
+//                            ),
                             AccountsSectionData(
                                 title = "Service Number",
                                 value = subscriberInfo.serviceNumber.ifEmpty { "Not set" },
@@ -319,7 +331,7 @@ fun AccountsSection(
                                 icon = Map
                             ),
                             AccountsSectionData(
-                                title = "Edit Subscriber Info",
+                                title = "Edit Profile",
                                 icon = Icons.Default.Edit,
                                 onClick = { showSubscriberInfo = true }
                             ),
@@ -339,14 +351,11 @@ fun AccountsSection(
                                 icon = Logout,
                                 onClick = {
                                     if (!isLoggingOut) {
-                                        // Make sure deviceId is not null
                                         val currentDeviceId = deviceId ?: UserSession.getDeviceId(context)
                                         if (currentDeviceId != null) {
                                             logoutViewModel.logout(currentDeviceId, context)
                                         } else {
-                                            // Handle case where deviceId is null
                                             Log.e("AccountsSection", "Device ID is null")
-                                            // Still clear local session
                                             UserSession.clearSession(context)
                                             val intent = Intent(context, StartScreen::class.java)
                                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -367,7 +376,24 @@ fun AccountsSection(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
-                            .padding(horizontal = childPadding.start),
+                            .padding(horizontal = childPadding.start)
+                            .onPreviewKeyEvent { keyEvent ->
+                                // Handle back button to go back to left column
+                                when {
+                                    keyEvent.key == Key.Back && keyEvent.type == KeyEventType.KeyUp -> {
+                                        onNavigateToLeft()
+                                        return@onPreviewKeyEvent true
+                                    }
+                                    keyEvent.key == Key.DirectionLeft && keyEvent.type == KeyEventType.KeyUp -> {
+                                        // If at first column, move focus to left sidebar
+                                        if (focusedItemIndex % 3 == 0) {
+                                            onNavigateToLeft()
+                                            return@onPreviewKeyEvent true
+                                        }
+                                    }
+                                }
+                                false
+                            },
                         columns = GridCells.Fixed(3),
                     ) {
                         items(accountsSectionListItems.size) { index ->
@@ -375,11 +401,23 @@ fun AccountsSection(
                                 modifier = Modifier
                                     .focusRequester(if (index == 0) focusRequester else FocusRequester())
                                     .padding(4.dp),
-                                key = index,
-                                accountsSectionData = accountsSectionListItems[index]
+                                itemKey = index,  // Changed from 'key' to 'itemKey'
+                                index = index,
+                                accountsSectionData = accountsSectionListItems[index],
+                                onFocusChanged = { isFocused ->
+                                    if (isFocused) {
+                                        focusedItemIndex = index
+                                    }
+                                }
                             )
                         }
                     }
+                }
+
+                // Request focus to first item when screen loads
+                LaunchedEffect(Unit) {
+                    kotlinx.coroutines.delay(100)
+                    focusRequester.requestFocus()
                 }
 
                 // Show loading indicator while logging out
@@ -441,7 +479,6 @@ fun AccountsSection(
     }
 }
 
-
 @Composable
 fun QuickStatCard(
     title: String,
@@ -484,6 +521,7 @@ fun QuickStatCard(
         }
     }
 }
+
 
 @Composable
 fun SubscriberInfoDialog(
@@ -534,20 +572,20 @@ fun SubscriberInfoDialog(
                         modifier = Modifier.weight(1f)
                     )
                     Row {
-                        listOf("No (0)", "Yes (1)").forEachIndexed { index, option ->
+                        listOf("No (0)", "Yes (1)").forEachIndexed { idx, option ->
                             Box(
                                 modifier = Modifier
                                     .padding(horizontal = 3.dp)
                                     .background(
-                                        color = if ((index == 0 && useAltLcoCode == "0") ||
-                                            (index == 1 && useAltLcoCode == "1"))
+                                        color = if ((idx == 0 && useAltLcoCode == "0") ||
+                                            (idx == 1 && useAltLcoCode == "1"))
                                             Color(0xFFE50914)
                                         else
                                             Color(0xFF333333),
                                         shape = RoundedCornerShape(3.dp)
                                     )
                                     .clickable(enabled = !isUpdating) {
-                                        useAltLcoCode = if (index == 0) "0" else "1"
+                                        useAltLcoCode = if (idx == 0) "0" else "1"
                                     }
                                     .padding(horizontal = 10.dp, vertical = 5.dp)
                             ) {

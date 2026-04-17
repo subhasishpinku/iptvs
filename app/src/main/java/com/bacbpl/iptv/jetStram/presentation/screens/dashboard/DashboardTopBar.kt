@@ -283,7 +283,7 @@ private fun JetStreamLogo(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logos),
+            painter = painterResource(id = R.drawable.logoss),
             contentDescription = "JetStream Logo Image",
             modifier = Modifier
                 .padding(start = 4.dp)

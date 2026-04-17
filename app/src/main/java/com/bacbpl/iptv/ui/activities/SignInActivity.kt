@@ -1,7 +1,6 @@
 package com.bacbpl.iptv.ui.activities
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -194,7 +193,7 @@ fun SignInActivity(
             ) {
                 repeat(30) {
                     Image(
-                        painter = painterResource(id = R.drawable.logos),
+                        painter = painterResource(id = R.drawable.logoss),
                         contentDescription = "Logo",
                         modifier = Modifier.height(80.dp).clip(RoundedCornerShape(12.dp))
                     )

@@ -7,7 +7,7 @@
         </shape>
     </item>
     <item
-        android:drawable="@drawable/ic_launcher_background"
+        android:drawable="@mipmap/ic_launcher_round"
         android:gravity="center"
         android:width="80dp"
         android:height="80dp" />
