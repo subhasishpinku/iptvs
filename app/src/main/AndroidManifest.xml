@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<!--    <uses-permission android:name="android.permission.CAMERA" />-->
+<!--    <uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
-    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />
-    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
+<!--    <uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" />-->
+<!--    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />-->
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- SMS permissions for OTP -->
-    <uses-permission android:name="android.permission.RECEIVE_SMS"
-        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
-    <uses-permission android:name="android.permission.READ_SMS"
-        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+<!--    <uses-permission android:name="android.permission.RECEIVE_SMS"-->
+<!--        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />-->
+<!--    <uses-permission android:name="android.permission.READ_SMS"-->
+<!--        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />-->
     <!-- Phone state for TV devices -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<!--    <uses-permission android:name="android.permission.READ_PHONE_STATE" />-->
     <!-- For Google Play Services -->
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+<!--    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />-->
 
     <!-- For Android 10+ - Required to get MAC address -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!--    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
+<!--    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
     <!-- TV Requirements -->
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
     <uses-feature
         android:name="android.software.leanback"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
+        android:required="true" />
+<!--    <uses-feature-->
+<!--        android:name="android.hardware.camera"-->
+<!--        android:required="false" />-->
 
     <application
         android:networkSecurityConfig="@xml/network_security_config"
@@ -59,13 +61,12 @@
         android:screenOrientation="landscape"
         android:theme="@style/Theme.Leanback.NoActionBar"
         android:banner="@drawable/tv_banner"
-        android:icon="@drawable/ic_launcher_background"
+        android:icon="@drawable/tv_banner"
         android:label="@string/app_name"
-        android:logo="@drawable/ic_launcher_background">
+        android:logo="@drawable/tv_banner">
 
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER"/>
             <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
         </intent-filter>
     </activity>
@@ -96,7 +97,7 @@
             android:focusableInTouchMode="true" />
         <activity
             android:name=".ui.activities.subscribescreen.SubscribeScreen"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.Leanback.NoActionBar"
             android:configChanges="orientation|keyboardHidden|screenSize"

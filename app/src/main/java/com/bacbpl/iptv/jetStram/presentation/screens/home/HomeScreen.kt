@@ -134,16 +134,16 @@ private fun Catalog(
 //        }
 
         // OTT Widgets - Dynamic rows from API
-        widgets.forEach { widget ->
-            item(contentType = widget.type) {
-                OttWidgetRow(
-                    widget = widget,
-                    onItemClick = onWidgetItemClick,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-            }
-        }
-
+//        widgets.forEach { widget ->
+//            item(contentType = widget.type) {
+//                OttWidgetRow(
+//                    widget = widget,
+//                    onItemClick = onWidgetItemClick,
+//                    modifier = Modifier.padding(top = 10.dp)
+//                )
+//            }
+//        }
+//
 
 
         // Trending Movies
