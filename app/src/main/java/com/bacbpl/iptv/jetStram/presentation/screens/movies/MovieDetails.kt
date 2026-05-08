@@ -255,18 +255,18 @@ fun MovieDetails(
 
                                         if (!authorizedUrl.isNullOrEmpty()) {
                                             println("Attempting to open: $authorizedUrl")
-                                            val cleanUrl = getCleanUrl(authorizedUrl)
-                                            openOttApp(context, cleanUrl)
+//                                            val cleanUrl = getCleanUrl(authorizedUrl)
+//                                            openOttApp(context, cleanUrl)
 //                                            openOttApp(context, authorizedUrl)
                                         } else {
                                             println("Authorized URL null → opening Play Store fallback")
-                                            openPlayStore(context)
+//                                            openPlayStore(context)
                                         }
 
                                     } catch (e: Exception) {
                                         println("Exception: ${e.message}")
                                         e.printStackTrace()
-                                        openPlayStore(context)
+//                                        openPlayStore(context)
                                     } finally {
                                         isLoadingAuthUrl = false
                                     }
@@ -281,84 +281,84 @@ fun MovieDetails(
         }
     }
 }
-fun openOttApp(context: Context, url: String) {
-    try {
-        println("Opening URL: $url")
-
-        // First try to open with the specific package
-        val uri = Uri.parse(url)
-        println("URLs: $url")
-
-        // Try to open with the specific app first
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            // Try different possible package names
-            val packages = listOf(
-                "com.ht.ottplay",  // Your specified package
-                "com.ottplay",     // Alternative package name
-                "com.ottplay.app"  // Another alternative
-            )
-
-            for (pkg in packages) {
-                try {
-                    context.packageManager.getPackageInfo(pkg, 0)
-                    setPackage(pkg)
-                    break
-                } catch (e: Exception) {
-                    println("Package $pkg not installed")
-                }
-            }
-
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        }
-
-        // Check if there's any activity that can handle this intent
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-            println("Intent started successfully")
-        } else {
-            println("No activity found to handle the intent")
-            // Fallback to browser
-            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(browserIntent)
-        }
-
-    } catch (e: Exception) {
-        println("Error opening OTT app: ${e.message}")
-        e.printStackTrace()
-        openPlayStore(context)
-    }
-}
-fun openPlayStore(context: Context) {
-    try {
-        val intent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("market://details?id=com.ht.ottplay")
-        ).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-
-        context.startActivity(intent)
-
-    } catch (e: Exception) {
-        println("Play Store not found → opening web")
-
-        val webIntent = Intent(
-            Intent.ACTION_VIEW,
-            Uri.parse("https://www.ottplay.com/app")
-        ).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-
-        context.startActivity(webIntent)
-    }
-}
-
-fun getCleanUrl(url: String): String {
-    return url.substringBefore("?")
-}
+//fun openOttApp(context: Context, url: String) {
+//    try {
+//        println("Opening URL: $url")
+//
+//        // First try to open with the specific package
+//        val uri = Uri.parse(url)
+//        println("URLs: $url")
+//
+//        // Try to open with the specific app first
+//        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+//            // Try different possible package names
+//            val packages = listOf(
+//                "com.ht.ottplay",  // Your specified package
+//                "com.ottplay",     // Alternative package name
+//                "com.ottplay.app"  // Another alternative
+//            )
+//
+//            for (pkg in packages) {
+//                try {
+//                    context.packageManager.getPackageInfo(pkg, 0)
+//                    setPackage(pkg)
+//                    break
+//                } catch (e: Exception) {
+//                    println("Package $pkg not installed")
+//                }
+//            }
+//
+//            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//        }
+//
+//        // Check if there's any activity that can handle this intent
+//        if (intent.resolveActivity(context.packageManager) != null) {
+//            context.startActivity(intent)
+//            println("Intent started successfully")
+//        } else {
+//            println("No activity found to handle the intent")
+//            // Fallback to browser
+//            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            }
+//            context.startActivity(browserIntent)
+//        }
+//
+//    } catch (e: Exception) {
+//        println("Error opening OTT app: ${e.message}")
+//        e.printStackTrace()
+//        openPlayStore(context)
+//    }
+//}
+//fun openPlayStore(context: Context) {
+//    try {
+//        val intent = Intent(
+//            Intent.ACTION_VIEW,
+//            Uri.parse("market://details?id=com.ht.ottplay")
+//        ).apply {
+//            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        }
+//
+//        context.startActivity(intent)
+//
+//    } catch (e: Exception) {
+//        println("Play Store not found → opening web")
+//
+//        val webIntent = Intent(
+//            Intent.ACTION_VIEW,
+//            Uri.parse("https://www.ottplay.com/app")
+//        ).apply {
+//            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        }
+//
+//        context.startActivity(webIntent)
+//    }
+//}
+//
+//fun getCleanUrl(url: String): String {
+//    return url.substringBefore("?")
+//}
 // Function to get authorized OTTplay URL with Bearer Token using POST
 private suspend fun getAuthorizedOttplayUrl1(ottplayUrl: String, context: Context): String? {
     return try {
