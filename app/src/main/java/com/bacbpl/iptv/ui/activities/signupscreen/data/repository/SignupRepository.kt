@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.flow
 class SignupRepository {
     private val api = RetrofitClient.apiService
 
-    suspend fun signup(mobile: String, name: String, email: String): Flow<Resource<SignupResponse>> = flow {
+    suspend fun signup(mobile: String, name: String, email: String, password: String): Flow<Resource<SignupResponse>> = flow {
         emit(Resource.Loading())
         try {
-            val response = api.signup(mobile, name, email)
+            val response = api.signup(mobile, name, email, password)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
@@ -33,7 +33,6 @@ class SignupRepository {
             emit(Resource.Error(e.message ?: "Network error occurred"))
         }
     }.catch { e ->
-        // This catch block handles any exceptions that might occur during flow collection
         e.printStackTrace()
         emit(Resource.Error(e.message ?: "Unexpected error occurred"))
     }

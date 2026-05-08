@@ -78,7 +78,7 @@ class SharedPrefManager(context: Context) {
                 println("Token saved: ${token.take(20)}...")
             }
 
-            prefs.edit().putInt(KEY_USER_ID, signupResponse.user.id).apply()
+            prefs.edit().putInt(KEY_USER_ID, signupResponse.user!!.id).apply()
             prefs.edit().putString(KEY_USER_NAME, signupResponse.user.name).apply()
             prefs.edit().putString(KEY_USER_EMAIL, signupResponse.user.email).apply()
             prefs.edit().putString(KEY_USER_MOBILE, signupResponse.user.mobile).apply()

@@ -10,7 +10,6 @@ import com.bacbpl.iptv.ui.activities.signupscreen.data.repository.SignupReposito
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class SignupViewModel(application: Application) : AndroidViewModel(application) {
@@ -20,19 +19,18 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
     private val _signupState = MutableStateFlow<SignupUiState>(SignupUiState.Initial)
     val signupState: StateFlow<SignupUiState> = _signupState.asStateFlow()
 
-    fun signup(mobile: String, name: String, email: String) {
+    fun signup(mobile: String, name: String, email: String, password: String) {
         viewModelScope.launch {
             _signupState.value = SignupUiState.Loading
 
             try {
-                repository.signup(mobile, name, email).collect { resource ->
+                repository.signup(mobile, name, email, password).collect { resource ->
                     when (resource) {
                         is Resource.Loading -> {
                             _signupState.value = SignupUiState.Loading
                         }
                         is Resource.Success -> {
                             try {
-                                // Save the signup response to SharedPreferences
                                 resource.data?.let { response ->
                                     if (response.status) {
                                         println("=== Signup Success ===")
@@ -68,7 +66,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             sharedPrefManager.saveUserFromSignup(response)
         } catch (e: Exception) {
             e.printStackTrace()
-            throw e // Re-throw to be caught in the calling function
+            throw e
         }
     }
 
@@ -77,7 +75,6 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
     }
 }
 
-// UI States
 sealed class SignupUiState {
     object Initial : SignupUiState()
     object Loading : SignupUiState()

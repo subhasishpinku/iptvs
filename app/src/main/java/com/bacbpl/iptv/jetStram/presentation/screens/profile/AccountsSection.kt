@@ -47,7 +47,8 @@ import com.bacbpl.iptv.jetStram.presentation.screens.dashboard.rememberChildPadd
 import com.bacbpl.iptv.jetStram.presentation.viewmodel.ProfileViewModel
 import com.bacbpl.iptv.jetStram.presentation.viewmodel.LogoutViewModel
 import com.bacbpl.iptv.ui.activities.signupscreen.data.repository.Resource
-
+import com.bacbpl.iptv.jetStram.presentation.viewmodel.DeleteAccountViewModel
+import android.widget.Toast
 val QrCode = Icons.Default.QrCodeScanner
 val ConfirmationNumber = Icons.Default.ConfirmationNumber
 val LocationOn = Icons.Default.LocationOn
@@ -82,6 +83,7 @@ data class SubscriberInfo(
 fun AccountsSection(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     logoutViewModel: LogoutViewModel = hiltViewModel(),
+    deleteAccountViewModel: DeleteAccountViewModel = hiltViewModel(), // Add this
     onNavigateToLeft: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -108,6 +110,18 @@ fun AccountsSection(
     // Observe logout state
     val logoutState by logoutViewModel.logoutState.collectAsState()
     val isLoggingOut by logoutViewModel.isLoggingOut.collectAsState()
+
+
+    var showDeleteOtpDialog by remember { mutableStateOf(false) }
+
+    // Observe delete account states
+    val sendOtpState by deleteAccountViewModel.sendOtpState.collectAsState()
+    val isSendingOtp by deleteAccountViewModel.isSendingOtp.collectAsState()
+    val deleteAccountState by deleteAccountViewModel.deleteAccountState.collectAsState()
+    val isDeletingAccount by deleteAccountViewModel.isDeletingAccount.collectAsState()
+    val generatedOtp by deleteAccountViewModel.generatedOtp.collectAsState()
+
+    var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
 
     // Handle logout response
     LaunchedEffect(logoutState) {
@@ -206,7 +220,46 @@ fun AccountsSection(
     LaunchedEffect(Unit) {
         UserSession.updateSession(context)
     }
+    // Handle send OTP response
+    LaunchedEffect(sendOtpState) {
+        when (sendOtpState) {
+            is Resource.Success -> {
+                deleteErrorMessage = null
+                Toast.makeText(context, "OTP sent successfully", Toast.LENGTH_SHORT).show()
+            }
+            is Resource.Error -> {
+                deleteErrorMessage = (sendOtpState as Resource.Error).message
+                Toast.makeText(context, deleteErrorMessage, Toast.LENGTH_SHORT).show()
+                showDeleteOtpDialog = false
+                deleteAccountViewModel.resetStates()
+            }
+            else -> {}
+        }
+    }
 
+    // Handle delete account response
+    LaunchedEffect(deleteAccountState) {
+        when (deleteAccountState) {
+            is Resource.Success -> {
+                val message = (deleteAccountState as Resource.Success).data?.message ?: "Account deleted successfully"
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                deleteAccountViewModel.resetStates()
+                showDeleteOtpDialog = false
+                showDeleteDialog = false
+                // Navigate to start screen
+                val intent = Intent(context, StartScreen::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+            }
+            is Resource.Error -> {
+                val error = (deleteAccountState as Resource.Error).message ?: "Failed to delete account"
+                deleteErrorMessage = error
+                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                deleteAccountViewModel.resetStates()
+            }
+            else -> {}
+        }
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Black
@@ -275,11 +328,15 @@ fun AccountsSection(
 
                     val accountsSectionListItems = remember(userName, userEmail, userMobile, subscriberInfo) {
                         listOf(
-                            AccountsSectionData(
-                                title = "Name",
-                                value = userName ?: "User",
-                                icon = Icons.Default.Person
-                            ),
+//                            AccountsSectionData(
+//                                title = "Delete Account",
+//                                icon = Icons.Default.Delete,
+//                                onClick = {
+//                                    showDeleteDialog = true
+//                                    deleteAccountViewModel.resetStates()
+//                                    deleteErrorMessage = null
+//                                }
+//                            ),
                             AccountsSectionData(
                                 title = "Email",
                                 value = userEmail ?: "Email not set",
@@ -470,11 +527,62 @@ fun AccountsSection(
                 )
             }
 
-            AccountsSectionDeleteDialog(
-                showDialog = showDeleteDialog,
-                onDismissRequest = { showDeleteDialog = false },
-                modifier = Modifier.width(428.dp)
-            )
+            // Add the OTP dialog after the delete confirmation dialog
+            if (showDeleteDialog) {
+                // First confirmation dialog
+                AccountsSectionDeleteDialog(
+                    showDialog = showDeleteDialog,
+                    onDismissRequest = {
+                        showDeleteDialog = false
+                        deleteAccountViewModel.resetStates()
+                    },
+                    modifier = Modifier.width(428.dp),
+                    onConfirm = {
+                        showDeleteDialog = false
+                        // Send OTP when user confirms delete
+                        val mobileNumber = userMobile?.replace("+91", "")?.replace(" ", "") ?: ""
+                        val currentDeviceId = deviceId ?: UserSession.getDeviceId(context)
+                        if (mobileNumber.isNotEmpty() && currentDeviceId != null) {
+                            deleteAccountViewModel.sendDeleteOtp(mobileNumber, currentDeviceId, context)
+                            showDeleteOtpDialog = true
+                        } else {
+                            Toast.makeText(context, "Unable to process delete request", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+            }
+
+            // OTP verification dialog
+            if (showDeleteOtpDialog) {
+                DeleteAccountOtpDialog(
+                    mobile = userMobile?.replace("+91", "") ?: "",
+                    generatedOtp = generatedOtp,
+                    isSendingOtp = isSendingOtp,
+                    isDeleting = isDeletingAccount,
+                    errorMessage = deleteErrorMessage,
+                    onDismiss = {
+                        showDeleteOtpDialog = false
+                        deleteAccountViewModel.resetStates()
+                        deleteErrorMessage = null
+                    },
+                    onSendOtp = {
+                        deleteErrorMessage = null
+                        val mobileNumber = userMobile?.replace("+91", "")?.replace(" ", "") ?: ""
+                        val currentDeviceId = deviceId ?: UserSession.getDeviceId(context)
+                        if (mobileNumber.isNotEmpty() && currentDeviceId != null) {
+                            deleteAccountViewModel.sendDeleteOtp(mobileNumber, currentDeviceId, context)
+                        }
+                    },
+                    onVerifyAndDelete = { otp ->
+                        deleteErrorMessage = null
+                        val mobileNumber = userMobile?.replace("+91", "")?.replace(" ", "") ?: ""
+                        val currentDeviceId = deviceId ?: UserSession.getDeviceId(context)
+                        if (mobileNumber.isNotEmpty() && currentDeviceId != null) {
+                            deleteAccountViewModel.verifyOtpAndDelete(otp, currentDeviceId, mobileNumber, context)
+                        }
+                    }
+                )
+            }
         }
     }
 }

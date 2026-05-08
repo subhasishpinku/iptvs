@@ -40,15 +40,18 @@ fun SignupActivity(
 
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
 
     // Validation states
     var nameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
 
     var nameTouched by remember { mutableStateOf(false) }
     var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
     var phoneTouched by remember { mutableStateOf(false) }
 
     val signupState by viewModel.signupState.collectAsState()
@@ -103,6 +106,19 @@ fun SignupActivity(
         }
     }
 
+    fun validatePassword(password: String): String? {
+        return when {
+            password.isBlank() -> "Password is required"
+            password.length < 6 -> "Password must be at least 6 characters"
+            password.length > 20 -> "Password must be less than 20 characters"
+            !password.matches(Regex(".*[A-Z].*")) -> "Password must contain at least one uppercase letter"
+            !password.matches(Regex(".*[a-z].*")) -> "Password must contain at least one lowercase letter"
+            !password.matches(Regex(".*[0-9].*")) -> "Password must contain at least one number"
+            !password.matches(Regex(".*[@#\$%^&+=!].*")) -> "Password must contain at least one special character (@#\$%^&+=!)"
+            else -> null
+        }
+    }
+
     fun validatePhone(phone: String): String? {
         val cleanedPhone = phone.replace(Regex("[\\s-]"), "")
         return when {
@@ -115,23 +131,27 @@ fun SignupActivity(
     fun validateAllFields(): Boolean {
         nameError = validateName(name)
         emailError = validateEmail(email)
+        passwordError = validatePassword(password)
         phoneError = validatePhone(phone)
 
         nameTouched = true
         emailTouched = true
+        passwordTouched = true
         phoneTouched = true
 
-        return nameError == null && emailError == null && phoneError == null
+        return nameError == null && emailError == null &&
+                passwordError == null && phoneError == null
     }
 
-    // Check if form is valid for button enable
-    val isFormValid = remember(name, email, phone, nameError, emailError, phoneError) {
-        name.isNotBlank() && email.isNotBlank() && phone.length == 10 &&
-                nameError == null && emailError == null && phoneError == null
+    val isFormValid = remember(name, email, password, phone,
+        nameError, emailError, passwordError, phoneError) {
+        name.isNotBlank() && email.isNotBlank() &&
+                password.isNotBlank() && phone.length == 10 &&
+                nameError == null && emailError == null &&
+                passwordError == null && phoneError == null
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image
         AsyncImage(
             model = R.drawable.bg_movies,
             contentDescription = null,
@@ -139,14 +159,12 @@ fun SignupActivity(
             contentScale = ContentScale.Crop
         )
 
-        // Dark Overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.7f))
         )
 
-        // Card
         Card(
             modifier = Modifier
                 .width(450.dp)
@@ -160,7 +178,6 @@ fun SignupActivity(
             Column(
                 modifier = Modifier.padding(28.dp)
             ) {
-                // Title with Back Button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -189,7 +206,6 @@ fun SignupActivity(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Input Fields
                 SignupTextField(
                     value = name,
                     hint = "Enter Name",
@@ -220,6 +236,21 @@ fun SignupActivity(
                 )
 
                 SignupTextField(
+                    value = password,
+                    hint = "Enter Password",
+                    keyboardType = KeyboardType.Password,
+                    error = if (passwordTouched) passwordError else null,
+                    onValueChange = {
+                        password = it
+                        passwordError = validatePassword(it)
+                    },
+                    onFocusChanged = { hasFocus ->
+                        if (!hasFocus) passwordTouched = true
+                    },
+                    enabled = signupState !is SignupUiState.Loading
+                )
+
+                SignupTextField(
                     value = phone,
                     hint = "Enter Phone Number",
                     keyboardType = KeyboardType.Phone,
@@ -239,7 +270,6 @@ fun SignupActivity(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Submit Button or Loading Indicator
                 if (signupState is SignupUiState.Loading) {
                     Box(
                         modifier = Modifier
@@ -256,7 +286,8 @@ fun SignupActivity(
                         onClick = {
                             if (validateAllFields()) {
                                 val formattedPhone = "+91$phone"
-                                viewModel.signup(formattedPhone, name, email)
+                                // FIXED: Added password parameter here
+                                viewModel.signup(formattedPhone, name, email, password)
                             }
                         },
                         modifier = Modifier
@@ -277,7 +308,6 @@ fun SignupActivity(
                     }
                 }
 
-                // Sign In Link
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -13,6 +13,7 @@ import com.bacbpl.iptv.ui.activities.*
 import com.bacbpl.iptv.ui.activities.otpscreen.OTPActivity
 import com.bacbpl.iptv.ui.activities.signupscreen.SignupActivity
 import com.bacbpl.iptv.utils.LoginUtils
+import com.bacbpl.iptv.utils.ToastUtils
 
 @Composable
 fun AppNavigation() {
@@ -66,6 +67,7 @@ fun AppNavigation() {
                 }
             )
         }
+
         composable(
             route = "otp/{phone}/{deviceId}/{macId}/{deviceName}",
             arguments = listOf(
@@ -75,7 +77,6 @@ fun AppNavigation() {
                 navArgument("deviceName") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-
             val phone = backStackEntry.arguments?.getString("phone") ?: ""
             val deviceId = backStackEntry.arguments?.getString("deviceId") ?: ""
             val macId = backStackEntry.arguments?.getString("macId") ?: ""
@@ -98,11 +99,18 @@ fun AppNavigation() {
 
         composable("signup") {
             SignupActivity(
-                onNavigateToSignIn = { navController.popBackStack() },
-                onSignupSuccess = {  //  callback
-                    // After successful signup, navigate to main
-                    navController.navigate("main") {
+                onNavigateToSignIn = {
+                    // Go back to signin screen
+                    navController.popBackStack()
+                },
+                onSignupSuccess = {
+                    // OPTION 1: Show success message and go to Sign In page
+                    ToastUtils.showSafeToast(context, "Account created successfully! Please sign in")
+
+                    // Navigate to signin screen and clear back stack
+                    navController.navigate("signin") {
                         popUpTo("signup") { inclusive = true }
+                        // This ensures user can't go back to signup screen
                     }
                 }
             )

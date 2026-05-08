@@ -38,6 +38,7 @@ import com.bacbpl.iptv.jetStram.tvmaterial.StandardDialog
 fun AccountsSectionDeleteDialog(
     showDialog: Boolean,
     onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit = {}, // Add this parameter
     modifier: Modifier = Modifier
 ) {
     StandardDialog(
@@ -49,7 +50,7 @@ fun AccountsSectionDeleteDialog(
                 modifier = Modifier.padding(start = 8.dp),
                 text = stringResource(R.string.yes_delete_account),
                 shouldRequestFocus = true,
-                onClick = onDismissRequest
+                onClick = onConfirm
             )
         },
         dismissButton = {

@@ -506,16 +506,16 @@ fun SignInActivity(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-//                        TextButton(
-//                            onClick = onNavigateToSignUp,
-//                            modifier = Modifier.align(Alignment.CenterHorizontally)
-//                        ) {
-//                            Text(
-//                                text = "New here? Sign up now.",
-//                                color = Color.White,
-//                                fontSize = 11.sp
-//                            )
-//                        }
+                        TextButton(
+                            onClick = onNavigateToSignUp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
+                            Text(
+                                text = "New here? Sign up now.",
+                                color = Color.White,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
                 }
             }

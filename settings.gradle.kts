@@ -25,5 +25,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "bacbpliptv"
 include(":app")
-include(":benchmark")
+//include(":benchmark")
  
